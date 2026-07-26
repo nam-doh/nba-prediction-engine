@@ -24,7 +24,6 @@ Develop the first predictive forecasting models.
 - [ ] Logistic Regression
 - [ ] Random Forest
 - [ ] XGBoost
-- [ ] Time-Series Models
 
 ---
 
