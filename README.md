@@ -20,23 +20,35 @@ This project explores the relationship between NBA team statistics and team succ
 * Outlier identification
 * Feature selection
 
-### Phase 3: Predictive Modeling (In Progress)
+### Phase 3: Predictive Modeling
 
-* Baseline predictive models
-* Train/test evaluation
-* Performance metrics
+* Baseline predictive models (Logistic Regression, Decision Tree, Random Forest, XGBoost)
+* Rolling feature engineering
+* Train/test evaluation and model comparison
+
+### Phase 4: Model Explainability
+
+* SHAP global and local explanations
+* Prediction confidence analysis
+* Probability calibration
+
+### Phase 5: Game Simulation
+
+* Monte Carlo single-game simulation
+* Best-of-seven series simulation
+* Full playoff bracket forecasting
 
 ## Notebook Reports
 
-### Phase 1
+See [`notebooks/README.md`](notebooks/README.md) for the full index.
 
-* `notebooks/01_data_exploration.ipynb`
-* `notebooks/01_data_exploration.html`
-
-### Phase 2
-
-* `notebooks/02_feature_analysis.ipynb`
-* `notebooks/02_feature_analysis.html`
+| Phase | Notebook | HTML Report |
+|-------|----------|-------------|
+| 1 — Data Exploration | [01_data_exploration.ipynb](notebooks/01_data_exploration.ipynb) | [View](notebooks/01_data_exploration.html) |
+| 2 — Feature Analysis | [02_feature_analysis.ipynb](notebooks/02_feature_analysis.ipynb) | [View](notebooks/02_feature_analysis.html) |
+| 3 — Predictive Modeling | [03_predictive_modeling.ipynb](notebooks/03_predictive_modeling.ipynb) | [View](notebooks/03_predictive_modeling.html) |
+| 4 — Model Explainability | [04_model_explainability.ipynb](notebooks/04_model_explainability.ipynb) | [View](notebooks/04_model_explainability.html) |
+| 5 — Game Simulation | [05_game_simulation.ipynb](notebooks/05_game_simulation.ipynb) | [View](notebooks/05_game_simulation.html) |
 
 ## Key Findings
 
@@ -47,8 +59,6 @@ This project explores the relationship between NBA team statistics and team succ
 
 ## Future Development
 
-* Predictive modeling using machine learning
-* Explainable AI techniques
-* Team performance forecasting
-* Game outcome prediction
-* Integration of additional data sources
+* Reinforcement learning for strategy optimization
+* Real-time prediction dashboard
+* Integration of additional data sources (injuries, player-level stats)

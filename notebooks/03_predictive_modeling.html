@@ -7332,12 +7332,7 @@ a.anchor-link {
     if (!diagrams.length) {
       return;
     }
-    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/11.10.0/mermaid.esm.min.mjs")).default;
-    const elkUrl = "https://cdnjs.cloudflare.com/ajax/libs/mermaid-layout-elk/0.1.9/mermaid-layout-elk.esm.min.mjs";
-    if(elkUrl) {
-      const elkLayouts = (await import(elkUrl)).default;
-      mermaid.registerLayoutLoaders(elkLayouts);
-    }
+    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.esm.min.mjs")).default;
     const parser = new DOMParser();
 
     mermaid.initialize({
@@ -7434,8 +7429,7 @@ a.anchor-link {
      * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
      */
     function cleanMermaidSvg(svg) {
-      svg = svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
-      return `${SVG_XML_HEADER}${svg}`;
+      return svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
     }
 
 
@@ -7461,285 +7455,6 @@ a.anchor-link {
       }
       return `<${tag} ${rest}>`;
     }
-
-
-  /**
-   * Named HTML entities with their decimal equivalent codes.
-   *
-   * @see https://www.w3.org/TR/WD-html40-970708/sgml/entities.html
-   * */
-  const HTML_ENTITIES = `<!ENTITY Aacute "&#193;">
-<!ENTITY aacute "&#225;">
-<!ENTITY Acirc "&#194;">
-<!ENTITY acirc "&#226;">
-<!ENTITY acute "&#180;">
-<!ENTITY AElig "&#198;">
-<!ENTITY aelig "&#230;">
-<!ENTITY Agrave "&#192;">
-<!ENTITY agrave "&#224;">
-<!ENTITY alefsym "&#8501;">
-<!ENTITY Alpha "&#913;">
-<!ENTITY alpha "&#945;">
-<!ENTITY amp "&#38;">
-<!ENTITY and "&#8869;">
-<!ENTITY ang "&#8736;">
-<!ENTITY Aring "&#197;">
-<!ENTITY aring "&#229;">
-<!ENTITY asymp "&#8776;">
-<!ENTITY Atilde "&#195;">
-<!ENTITY atilde "&#227;">
-<!ENTITY Auml "&#196;">
-<!ENTITY auml "&#228;">
-<!ENTITY bdquo "&#8222;">
-<!ENTITY Beta "&#914;">
-<!ENTITY beta "&#946;">
-<!ENTITY brvbar "&#166;">
-<!ENTITY bull "&#8226;">
-<!ENTITY cap "&#8745;">
-<!ENTITY Ccedil "&#199;">
-<!ENTITY ccedil "&#231;">
-<!ENTITY cedil "&#184;">
-<!ENTITY cent "&#162;">
-<!ENTITY Chi "&#935;">
-<!ENTITY chi "&#967;">
-<!ENTITY circ "&#710;">
-<!ENTITY clubs "&#9827;">
-<!ENTITY cong "&#8773;">
-<!ENTITY copy "&#169;">
-<!ENTITY crarr "&#8629;">
-<!ENTITY cup "&#8746;">
-<!ENTITY curren "&#164;">
-<!ENTITY dagger "&#8224;">
-<!ENTITY Dagger "&#8225;">
-<!ENTITY darr "&#8595;">
-<!ENTITY dArr "&#8659;">
-<!ENTITY deg "&#176;">
-<!ENTITY Delta "&#916;">
-<!ENTITY delta "&#948;">
-<!ENTITY diams "&#9830;">
-<!ENTITY divide "&#247;">
-<!ENTITY Eacute "&#201;">
-<!ENTITY eacute "&#233;">
-<!ENTITY Ecirc "&#202;">
-<!ENTITY ecirc "&#234;">
-<!ENTITY Egrave "&#200;">
-<!ENTITY egrave "&#232;">
-<!ENTITY empty "&#8709;">
-<!ENTITY emsp "&#8195;">
-<!ENTITY ensp "&#8194;">
-<!ENTITY epsilon "&#949;">
-<!ENTITY Epsilon "&#917;">
-<!ENTITY equiv "&#8801;">
-<!ENTITY Eta "&#919;">
-<!ENTITY eta "&#951;">
-<!ENTITY ETH "&#208;">
-<!ENTITY eth "&#240;">
-<!ENTITY Euml "&#203;">
-<!ENTITY euml "&#235;">
-<!ENTITY exist "&#8707;">
-<!ENTITY fnof "&#402;">
-<!ENTITY forall "&#8704;">
-<!ENTITY frac12 "&#189;">
-<!ENTITY frac14 "&#188;">
-<!ENTITY frac34 "&#190;">
-<!ENTITY frasl "&#8260;">
-<!ENTITY Gamma "&#915;">
-<!ENTITY gamma "&#947;">
-<!ENTITY ge "&#8805;">
-<!ENTITY gt "&#62;">
-<!ENTITY harr "&#8596;">
-<!ENTITY hArr "&#8660;">
-<!ENTITY hearts "&#9829;">
-<!ENTITY hellip "&#8230;">
-<!ENTITY Iacute "&#205;">
-<!ENTITY iacute "&#237;">
-<!ENTITY Icirc "&#206;">
-<!ENTITY icirc "&#238;">
-<!ENTITY iexcl "&#161;">
-<!ENTITY Igrave "&#204;">
-<!ENTITY igrave "&#236;">
-<!ENTITY image "&#8465;">
-<!ENTITY infin "&#8734;">
-<!ENTITY int "&#8747;">
-<!ENTITY Iota "&#921;">
-<!ENTITY iota "&#953;">
-<!ENTITY iquest "&#191;">
-<!ENTITY isin "&#8712;">
-<!ENTITY Iuml "&#207;">
-<!ENTITY iuml "&#239;">
-<!ENTITY Kappa "&#922;">
-<!ENTITY kappa "&#954;">
-<!ENTITY Lambda "&#923;">
-<!ENTITY lambda "&#955;">
-<!ENTITY lang "&#9001;">
-<!ENTITY laquo "&#171;">
-<!ENTITY larr "&#8592;">
-<!ENTITY lArr "&#8656;">
-<!ENTITY lceil "&#8968;">
-<!ENTITY ldquo "&#8220;">
-<!ENTITY le "&#8804;">
-<!ENTITY lfloor "&#8970;">
-<!ENTITY lowast "&#8727;">
-<!ENTITY loz "&#9674;">
-<!ENTITY lrm "&#8206;">
-<!ENTITY lsaquo "&#8249;">
-<!ENTITY lsquo "&#8216;">
-<!ENTITY lt "&#60;">
-<!ENTITY macr "&#175;">
-<!ENTITY mdash "&#8212;">
-<!ENTITY micro "&#181;">
-<!ENTITY middot "&#183;">
-<!ENTITY minus "&#8722;">
-<!ENTITY Mu "&#924;">
-<!ENTITY mu "&#956;">
-<!ENTITY nabla "&#8711;">
-<!ENTITY nbsp "&#160;">
-<!ENTITY ndash "&#8211;">
-<!ENTITY ne "&#8800;">
-<!ENTITY ni "&#8715;">
-<!ENTITY not "&#172;">
-<!ENTITY notin "&#8713;">
-<!ENTITY nsub "&#8836;">
-<!ENTITY Ntilde "&#209;">
-<!ENTITY ntilde "&#241;">
-<!ENTITY Nu "&#925;">
-<!ENTITY nu "&#957;">
-<!ENTITY Oacute "&#211;">
-<!ENTITY oacute "&#243;">
-<!ENTITY Ocirc "&#212;">
-<!ENTITY ocirc "&#244;">
-<!ENTITY OElig "&#338;">
-<!ENTITY oelig "&#339;">
-<!ENTITY Ograve "&#210;">
-<!ENTITY ograve "&#242;">
-<!ENTITY oline "&#8254;">
-<!ENTITY Omega "&#937;">
-<!ENTITY omega "&#969;">
-<!ENTITY Omicron "&#927;">
-<!ENTITY omicron "&#959;">
-<!ENTITY oplus "&#8853;">
-<!ENTITY or "&#8870;">
-<!ENTITY ordf "&#170;">
-<!ENTITY ordm "&#186;">
-<!ENTITY Oslash "&#216;">
-<!ENTITY oslash "&#248;">
-<!ENTITY Otilde "&#213;">
-<!ENTITY otilde "&#245;">
-<!ENTITY otimes "&#8855;">
-<!ENTITY Ouml "&#214;">
-<!ENTITY ouml "&#246;">
-<!ENTITY para "&#182;">
-<!ENTITY part "&#8706;">
-<!ENTITY permil "&#8240;">
-<!ENTITY perp "&#8869;">
-<!ENTITY Phi "&#934;">
-<!ENTITY phi "&#966;">
-<!ENTITY Pi "&#928;">
-<!ENTITY pi "&#960;">
-<!ENTITY piv "&#982;">
-<!ENTITY plusmn "&#177;">
-<!ENTITY pound "&#163;">
-<!ENTITY prime "&#8242;">
-<!ENTITY Prime "&#8243;">
-<!ENTITY prod "&#8719;">
-<!ENTITY prop "&#8733;">
-<!ENTITY Psi "&#936;">
-<!ENTITY psi "&#968;">
-<!ENTITY quot "&#34;">
-<!ENTITY radic "&#8730;">
-<!ENTITY rang "&#9002;">
-<!ENTITY raquo "&#187;">
-<!ENTITY rarr "&#8594;">
-<!ENTITY rArr "&#8658;">
-<!ENTITY rceil "&#8969;">
-<!ENTITY rdquo "&#8221;">
-<!ENTITY real "&#8476;">
-<!ENTITY reg "&#174;">
-<!ENTITY rfloor "&#8971;">
-<!ENTITY Rho "&#929;">
-<!ENTITY rho "&#961;">
-<!ENTITY rlm "&#8207;">
-<!ENTITY rsaquo "&#8250;">
-<!ENTITY rsquo "&#8217;">
-<!ENTITY sbquo "&#8218;">
-<!ENTITY Scaron "&#352;">
-<!ENTITY scaron "&#353;">
-<!ENTITY sdot "&#8901;">
-<!ENTITY sect "&#167;">
-<!ENTITY shy "&#173;">
-<!ENTITY Sigma "&#931;">
-<!ENTITY sigma "&#963;">
-<!ENTITY sigmaf "&#962;">
-<!ENTITY sim "&#8764;">
-<!ENTITY spades "&#9824;">
-<!ENTITY sub "&#8834;">
-<!ENTITY sube "&#8838;">
-<!ENTITY sum "&#8721;">
-<!ENTITY sup "&#8835;">
-<!ENTITY sup1 "&#185;">
-<!ENTITY sup2 "&#178;">
-<!ENTITY sup3 "&#179;">
-<!ENTITY supe "&#8839;">
-<!ENTITY szlig "&#223;">
-<!ENTITY Tau "&#932;">
-<!ENTITY tau "&#964;">
-<!ENTITY there4 "&#8756;">
-<!ENTITY Theta "&#920;">
-<!ENTITY theta "&#952;">
-<!ENTITY thetasym "&#977;">
-<!ENTITY thinsp "&#8201;">
-<!ENTITY THORN "&#222;">
-<!ENTITY thorn "&#254;">
-<!ENTITY tilde "&#732;">
-<!ENTITY times "&#215;">
-<!ENTITY trade "&#8482;">
-<!ENTITY Uacute "&#218;">
-<!ENTITY uacute "&#250;">
-<!ENTITY uarr "&#8593;">
-<!ENTITY uArr "&#8657;">
-<!ENTITY Ucirc "&#219;">
-<!ENTITY ucirc "&#251;">
-<!ENTITY Ugrave "&#217;">
-<!ENTITY ugrave "&#249;">
-<!ENTITY uml "&#168;">
-<!ENTITY upsih "&#978;">
-<!ENTITY Upsilon "&#933;">
-<!ENTITY upsilon "&#965;">
-<!ENTITY Uuml "&#220;">
-<!ENTITY uuml "&#252;">
-<!ENTITY weierp "&#8472;">
-<!ENTITY Xi "&#926;">
-<!ENTITY xi "&#958;">
-<!ENTITY Yacute "&#221;">
-<!ENTITY yacute "&#253;">
-<!ENTITY yen "&#165;">
-<!ENTITY Yuml "&#376;">
-<!ENTITY yuml "&#255;">
-<!ENTITY Zeta "&#918;">
-<!ENTITY zeta "&#950;">
-<!ENTITY zwj "&#8205;">
-<!ENTITY zwnj "&#8204;">`.replace(/\n/g, ' ');
-
-  /**
-   * A reasonably strict xml declaration.
-   */
-  const XML_DECL = '<?xml version="1.0" standalone="no"?>';
-
-  /**
-   * The beginning of the XML doctype declaration.
-   */
-  const DOCTYPE_START = `<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [`;
-
-  /**
-   * The end of the XML docype declaration.
-   */
-  const DOCTYPE_END = ']>';
-
-  /**
-   * A full header for an SVG XML document.
-   */
-  const SVG_XML_HEADER = `${XML_DECL}
-    ${DOCTYPE_START}${HTML_ENTITIES}${DOCTYPE_END}`;
 
     void Promise.all([...diagrams].map(renderOneMarmaid));
   });
@@ -7802,7 +7517,43 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Phase-3:-Predictive-Modeling">Phase 3: Predictive Modeling<a class="anchor-link" href="#Phase-3:-Predictive-Modeling">¶</a></h1>
+<h1 id="Phase-3:-Predictive-Modeling">Phase 3: Predictive Modeling<a class="anchor-link" href="#Phase-3:-Predictive-Modeling">¶</a></h1><p><strong>Goal:</strong> Build and compare baseline classifiers to predict game outcomes using rolling team features.</p>
+<h2 id="Table-of-Contents">Table of Contents<a class="anchor-link" href="#Table-of-Contents">¶</a></h2><ul>
+<li><a href="#data-validation-and-preparation">Data Validation and Preparation</a></li>
+<li><a href="#set-up-rolling-features">Set Up Rolling Features</a></li>
+<li><a href="#opponent-features">Opponent Features</a></li>
+<li><a href="#save-modeling-dataset">Save Modeling Dataset</a></li>
+<li><a href="#model-preparation">Model Preparation</a></li>
+<li><a href="#traintest-split">Train/Test Split</a></li>
+<li><a href="#choosing-features-and-target">Choosing Features and Target</a></li>
+<li><a href="#split-x-and-y">Split X and Y</a></li>
+<li><a href="#logistic-regression">Logistic Regression</a></li>
+<li><a href="#build-model">Build Model</a></li>
+<li><a href="#train">Train</a></li>
+<li><a href="#coefficients">Coefficients</a></li>
+<li><a href="#predict">Predict</a></li>
+<li><a href="#evaluate">Evaluate</a></li>
+<li><a href="#notes">Notes:</a></li>
+<li><a href="#decision-tree">Decision Tree</a></li>
+<li><a href="#feature-importance">Feature Importance</a></li>
+<li><a href="#notes">Notes</a></li>
+<li><a href="#random-forest">Random Forest</a></li>
+<li><a href="#xgboost">XGBoost</a></li>
+<li><a href="#model-comparison">Model Comparison</a></li>
+<li><a href="#table">Table</a></li>
+<li><a href="#chart">Chart</a></li>
+<li><a href="#model-selection">Model Selection</a></li>
+<li><a href="#key-findings">Key Findings</a></li>
+<li><a href="#predictive-performance">Predictive Performance</a></li>
+<li><a href="#effect-of-model-complexity">Effect of Model Complexity</a></li>
+<li><a href="#most-important-features">Most Important Features</a></li>
+<li><a href="#multicollinearity">Multicollinearity</a></li>
+<li><a href="#best-overall-models">Best Overall Models</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+<li><a href="#limitations">Limitations</a></li>
+<li><a href="#future-improvements">Future Improvements</a></li>
+</ul>
+<hr/>
 </div>
 </div>
 </div>
@@ -7822,7 +7573,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [425]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [490]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -7838,7 +7589,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [426]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [491]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">DATA_PATH</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"../data/processed/team_game_logs_clean.csv"</span><span class="p">)</span>
@@ -7872,7 +7623,7 @@ a.anchor-link {
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[426]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[491]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8049,11 +7800,37 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [427]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check columns'''</span>
-<span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Column inventory</span>
+<span class="n">columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total columns: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Required columns check</span>
+<span class="n">required_columns</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">"SEASON"</span><span class="p">,</span> <span class="s2">"GAME_ID"</span><span class="p">,</span> <span class="s2">"GAME_DATE"</span><span class="p">,</span> <span class="s2">"TEAM_ID"</span><span class="p">,</span> <span class="s2">"TEAM_NAME"</span><span class="p">,</span>
+    <span class="s2">"MATCHUP"</span><span class="p">,</span> <span class="s2">"WL"</span><span class="p">,</span> <span class="s2">"WIN"</span><span class="p">,</span> <span class="s2">"HOME_GAME"</span><span class="p">,</span> <span class="s2">"AWAY_GAME"</span><span class="p">,</span>
+    <span class="s2">"OPPONENT_ABBREVIATION"</span><span class="p">,</span> <span class="s2">"TEAM_GAME_NUMBER"</span><span class="p">,</span> <span class="s2">"PTS"</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">missing_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">required_columns</span> <span class="k">if</span> <span class="n">c</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Missing columns:"</span><span class="p">,</span> <span class="n">missing_columns</span><span class="p">)</span>
+
+<span class="c1"># Data range</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">First game: </span><span class="si">{</span><span class="n">df</span><span class="p">[</span><span class="s1">'GAME_DATE'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Last game:  </span><span class="si">{</span><span class="n">df</span><span class="p">[</span><span class="s1">'GAME_DATE'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Duplicate and target checks</span>
+<span class="n">dupes</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">duplicated</span><span class="p">([</span><span class="s2">"GAME_ID"</span><span class="p">,</span> <span class="s2">"TEAM_ID"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">missing_win</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">"WIN"</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Duplicate team-game rows: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Missing target values:     </span><span class="si">{</span><span class="n">missing_win</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Missing values and team counts</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Missing values:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Teams per season:"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"SEASON"</span><span class="p">)[</span><span class="s2">"TEAM_ID"</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -8064,7 +7841,7 @@ a.anchor-link {
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[427]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[ ]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>['SEASON_ID',
  'TEAM_ID',
@@ -8106,213 +7883,15 @@ a.anchor-link {
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=890dfcda">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [428]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check required columns'''</span>
-<span class="n">required_columns</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s2">"SEASON"</span><span class="p">,</span>
-    <span class="s2">"GAME_ID"</span><span class="p">,</span>
-    <span class="s2">"GAME_DATE"</span><span class="p">,</span>
-    <span class="s2">"TEAM_ID"</span><span class="p">,</span>
-    <span class="s2">"TEAM_NAME"</span><span class="p">,</span>
-    <span class="s2">"MATCHUP"</span><span class="p">,</span>
-    <span class="s2">"WL"</span><span class="p">,</span>
-    <span class="s2">"WIN"</span><span class="p">,</span>
-    <span class="s2">"HOME_GAME"</span><span class="p">,</span>
-    <span class="s2">"AWAY_GAME"</span><span class="p">,</span>
-    <span class="s2">"OPPONENT_ABBREVIATION"</span><span class="p">,</span>
-    <span class="s2">"TEAM_GAME_NUMBER"</span><span class="p">,</span>
-    <span class="s2">"PTS"</span><span class="p">,</span>
-<span class="p">]</span>
-
-<span class="n">missing_columns</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="n">column</span>
-    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">required_columns</span>
-    <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
-<span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Missing columns:"</span><span class="p">,</span> <span class="n">missing_columns</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Missing columns: []
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=ea07dfa3">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [429]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check data range'''</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"First game:"</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="s2">"GAME_DATE"</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">())</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Last game:"</span><span class="p">,</span> <span class="n">df</span><span class="p">[</span><span class="s2">"GAME_DATE"</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>First game: 2021-10-19 00:00:00
-Last game: 2026-04-12 00:00:00
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=2565294f">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [430]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check duplicate team rows'''</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"Duplicate team-game rows:"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">duplicated</span><span class="p">([</span><span class="s2">"GAME_ID"</span><span class="p">,</span> <span class="s2">"TEAM_ID"</span><span class="p">])</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-<span class="sd">'''Check missing target values'''</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Missing target values:"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">"WIN"</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>Duplicate team-game rows:
-0
-
-Missing target values:
-0
-</pre>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=74f80f3d">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [431]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check missing values and number of teams'''</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Missing values:"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-
-<span class="sd">'''Check number of teams'''</span>
-<span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"SEASON"</span><span class="p">)[</span><span class="s2">"TEAM_ID"</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell-outputWrapper">
-<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
-</div>
-<div class="jp-OutputArea jp-Cell-outputArea">
-<div class="jp-OutputArea-child">
-<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
-<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>
-Missing values:
-SEASON_ID                0
-TEAM_ID                  0
-TEAM_ABBREVIATION        0
-TEAM_NAME                0
-GAME_ID                  0
-GAME_DATE                0
-MATCHUP                  0
-WL                       0
-MIN                      0
-FGM                      0
-FGA                      0
-FG_PCT                   0
-FG3M                     0
-FG3A                     0
-FG3_PCT                  0
-FTM                      0
-FTA                      0
-FT_PCT                   1
-OREB                     0
-DREB                     0
-REB                      0
-AST                      0
-STL                      0
-BLK                      0
-TOV                      0
-PF                       0
-PTS                      0
-PLUS_MINUS               0
-VIDEO_AVAILABLE          0
-SEASON                   0
-SEASON_TYPE              0
-WIN                      0
-HOME_GAME                0
-AWAY_GAME                0
-OPPONENT_ABBREVIATION    0
-TEAM_GAME_NUMBER         0
-dtype: int64
-</pre>
-</div>
-</div>
-<div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[431]:</div>
-<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>SEASON
-2021-22    30
-2022-23    30
-2023-24    30
-2024-25    30
-2025-26    30
-Name: TEAM_ID, dtype: int64</pre>
-</div>
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=5a649a29">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [432]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [497]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check summary statistics'''</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Summary statistics</span>
 <span class="n">season_summary</span> <span class="o">=</span> <span class="p">(</span>
     <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">"SEASON"</span><span class="p">)</span>
     <span class="o">.</span><span class="n">agg</span><span class="p">(</span>
@@ -8336,7 +7915,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[432]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[497]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8433,7 +8012,7 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [433]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [498]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
@@ -8459,7 +8038,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[433]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[498]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8636,7 +8215,7 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [434]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [499]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s2">"PREV_WIN"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -8674,7 +8253,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[434]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[499]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8851,7 +8430,7 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [435]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [500]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">rolling_columns</span> <span class="o">=</span> <span class="p">[</span>
@@ -8905,7 +8484,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[435]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[500]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -9082,7 +8661,7 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [436]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [501]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s2">"WIN_PCT_ROLL5"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -9132,7 +8711,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[436]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[501]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -9320,7 +8899,7 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [437]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [502]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">opponent_feature_columns</span> <span class="o">=</span> <span class="p">[</span>
@@ -9383,7 +8962,7 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [438]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [503]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -9416,7 +8995,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[438]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[503]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -9558,10 +9137,10 @@ Name: TEAM_ID, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [439]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [504]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Check number of game_id per game to be 2'''</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Verify two rows per game (home + away)</span>
 <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
     <span class="p">[</span>
         <span class="s2">"SEASON"</span><span class="p">,</span>
@@ -9578,7 +9157,7 @@ Name: TEAM_ID, dtype: int64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[439]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[504]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>2    6150
 Name: count, dtype: int64</pre>
@@ -9591,7 +9170,7 @@ Name: count, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [440]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [505]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">df</span><span class="p">[</span><span class="s2">"PTS_ROLL5_DIFF"</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
@@ -9659,7 +9238,7 @@ Name: count, dtype: int64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [441]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [506]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">output_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span>
@@ -9721,7 +9300,7 @@ Columns: 77
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [442]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [507]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">train_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"SEASON"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"2025-26"</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -9748,7 +9327,7 @@ Columns: 77
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [443]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [508]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">features</span> <span class="o">=</span> <span class="p">[</span>
@@ -9808,7 +9387,7 @@ Columns: 77
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [444]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [509]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">target</span> <span class="o">=</span> <span class="s2">"WIN"</span>
@@ -9822,7 +9401,7 @@ Columns: 77
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [445]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [510]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="sd">'''Drop rows with missing feature values'''</span>
@@ -9850,7 +9429,7 @@ Columns: 77
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [446]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [511]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">train_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s2">"SEASON"</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"2025-26"</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -9891,7 +9470,7 @@ Name: count, dtype: Int64
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [447]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [512]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">train_df</span> <span class="o">=</span> <span class="n">train_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">features</span><span class="p">)</span>
@@ -9923,7 +9502,7 @@ Name: count, dtype: Int64
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [448]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [513]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">X_train</span> <span class="o">=</span> <span class="n">train_df</span><span class="p">[</span><span class="n">features</span><span class="p">]</span>
@@ -9943,7 +9522,7 @@ Name: count, dtype: Int64
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [449]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [514]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"Training Features:"</span><span class="p">,</span> <span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
@@ -9991,7 +9570,7 @@ Testing Labels: (2428,)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [450]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [515]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span>
@@ -10028,7 +9607,7 @@ Testing Labels: (2428,)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [451]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [516]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">logistic_model</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span>
@@ -10064,7 +9643,7 @@ Testing Labels: (2428,)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [452]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [517]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">logistic_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -10107,7 +9686,7 @@ Testing Labels: (2428,)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [453]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [518]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -10130,7 +9709,7 @@ Testing Labels: (2428,)
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[453]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[518]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -10358,7 +9937,7 @@ Testing Labels: (2428,)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [454]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [519]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -10399,7 +9978,7 @@ Testing Labels: (2428,)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [455]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [520]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">corr_matrix</span> <span class="o">=</span> <span class="n">X_train</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
@@ -10424,7 +10003,7 @@ Testing Labels: (2428,)
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[455]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[520]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>PLUS_MINUS_ROLL5_DIFF  WIN_PCT_ROLL5_DIFF    0.849563
 PLUS_MINUS_ROLL5       WIN_PCT_ROLL5         0.846626
@@ -10439,7 +10018,7 @@ dtype: float64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [456]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [521]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -10483,7 +10062,7 @@ dtype: float64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [457]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [522]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">y_pred</span> <span class="o">=</span> <span class="n">logistic_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -10502,7 +10081,7 @@ dtype: float64</pre>
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[457]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[522]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
 <pre>array([[0.8570702 , 0.1429298 ],
        [0.58652854, 0.41347146],
@@ -10520,7 +10099,7 @@ dtype: float64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [458]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [523]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -10564,7 +10143,7 @@ dtype: float64</pre>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [459]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [524]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Accuracy (correct predictions / total predictions)</span>
@@ -10636,7 +10215,7 @@ ROC AUC  : 0.711
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [460]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [525]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.tree</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
@@ -10661,7 +10240,7 @@ ROC AUC  : 0.711
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [461]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [526]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">decision_tree</span> <span class="o">=</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span>
@@ -10691,7 +10270,7 @@ ROC AUC  : 0.711
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [462]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [527]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">decision_tree</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
@@ -10731,7 +10310,7 @@ ROC AUC  : 0.711
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [463]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [528]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">y_pred_tree</span> <span class="o">=</span> <span class="n">decision_tree</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -10758,7 +10337,7 @@ ROC AUC  : 0.711
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [464]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [529]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">tree_accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_tree</span><span class="p">)</span>
@@ -10814,7 +10393,7 @@ ROC AUC  : 0.691
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [465]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [530]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">tree_cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span>
@@ -10858,7 +10437,7 @@ ROC AUC  : 0.691
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [466]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [531]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -10909,7 +10488,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [467]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [532]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">importance</span> <span class="o">=</span> <span class="p">(</span>
@@ -10933,7 +10512,7 @@ weighted avg       0.64      0.64      0.64      2428
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[467]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[532]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -11150,7 +10729,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [468]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [533]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -11218,7 +10797,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [469]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [534]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.ensemble</span><span class="w"> </span><span class="kn">import</span> <span class="n">RandomForestClassifier</span>
@@ -11243,7 +10822,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [470]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [535]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">random_forest</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span>
@@ -11274,7 +10853,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [471]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [536]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">random_forest</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -11317,7 +10896,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [472]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [537]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">y_pred_rf</span> <span class="o">=</span> <span class="n">random_forest</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -11344,7 +10923,7 @@ weighted avg       0.64      0.64      0.64      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [473]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [538]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">rf_accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_rf</span><span class="p">)</span>
@@ -11400,7 +10979,7 @@ ROC AUC  : 0.710
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [474]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [539]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">rf_cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span>
@@ -11444,7 +11023,7 @@ ROC AUC  : 0.710
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [475]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [540]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -11495,7 +11074,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [476]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [541]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">rf_importance</span> <span class="o">=</span> <span class="p">(</span>
@@ -11519,7 +11098,7 @@ weighted avg       0.65      0.65      0.65      2428
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[476]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[541]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -11736,7 +11315,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [477]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [542]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">top_features</span> <span class="o">=</span> <span class="p">(</span>
@@ -11800,7 +11379,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [478]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [543]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">xgboost</span><span class="w"> </span><span class="kn">import</span> <span class="n">XGBClassifier</span>
@@ -11825,7 +11404,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [479]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [544]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">xgb_model</span> <span class="o">=</span> <span class="n">XGBClassifier</span><span class="p">(</span>
@@ -11859,7 +11438,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [480]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [545]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">xgb_model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span>
@@ -11902,7 +11481,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [481]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [546]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">y_pred_xgb</span> <span class="o">=</span> <span class="n">xgb_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
@@ -11929,7 +11508,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [482]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [547]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">xgb_accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_xgb</span><span class="p">)</span>
@@ -11985,7 +11564,7 @@ ROC AUC  : 0.699
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [483]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [548]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">xgb_cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span>
@@ -12029,7 +11608,7 @@ ROC AUC  : 0.699
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [484]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [549]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span>
@@ -12080,7 +11659,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [485]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [550]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">xgb_importance</span> <span class="o">=</span> <span class="p">(</span>
@@ -12104,7 +11683,7 @@ weighted avg       0.65      0.65      0.65      2428
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[485]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[550]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -12321,7 +11900,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [486]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [551]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">top_features</span> <span class="o">=</span> <span class="p">(</span>
@@ -12408,7 +11987,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [487]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [552]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">model_results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
@@ -12484,79 +12063,79 @@ weighted avg       0.65      0.65      0.65      2428
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[487]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[552]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <style type="text/css">
-#T_2cd69_row0_col5, #T_2cd69_row4_col1, #T_2cd69_row4_col2, #T_2cd69_row5_col1, #T_2cd69_row5_col3, #T_2cd69_row5_col4 {
+#T_ddb78_row0_col5, #T_ddb78_row4_col1, #T_ddb78_row4_col2, #T_ddb78_row5_col1, #T_ddb78_row5_col3, #T_ddb78_row5_col4 {
   background-color: yellow;
 }
 </style>
-<table id="T_2cd69">
+<table id="T_ddb78">
 <thead>
 <tr>
 <th class="blank level0"> </th>
-<th class="col_heading level0 col0" id="T_2cd69_level0_col0">Model</th>
-<th class="col_heading level0 col1" id="T_2cd69_level0_col1">Accuracy</th>
-<th class="col_heading level0 col2" id="T_2cd69_level0_col2">Precision</th>
-<th class="col_heading level0 col3" id="T_2cd69_level0_col3">Recall</th>
-<th class="col_heading level0 col4" id="T_2cd69_level0_col4">F1 Score</th>
-<th class="col_heading level0 col5" id="T_2cd69_level0_col5">ROC AUC</th>
+<th class="col_heading level0 col0" id="T_ddb78_level0_col0">Model</th>
+<th class="col_heading level0 col1" id="T_ddb78_level0_col1">Accuracy</th>
+<th class="col_heading level0 col2" id="T_ddb78_level0_col2">Precision</th>
+<th class="col_heading level0 col3" id="T_ddb78_level0_col3">Recall</th>
+<th class="col_heading level0 col4" id="T_ddb78_level0_col4">F1 Score</th>
+<th class="col_heading level0 col5" id="T_ddb78_level0_col5">ROC AUC</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<th class="row_heading level0 row0" id="T_2cd69_level0_row0">0</th>
-<td class="data row0 col0" id="T_2cd69_row0_col0">Logistic Regression</td>
-<td class="data row0 col1" id="T_2cd69_row0_col1">0.644000</td>
-<td class="data row0 col2" id="T_2cd69_row0_col2">0.643000</td>
-<td class="data row0 col3" id="T_2cd69_row0_col3">0.647000</td>
-<td class="data row0 col4" id="T_2cd69_row0_col4">0.645000</td>
-<td class="data row0 col5" id="T_2cd69_row0_col5">0.711000</td>
+<th class="row_heading level0 row0" id="T_ddb78_level0_row0">0</th>
+<td class="data row0 col0" id="T_ddb78_row0_col0">Logistic Regression</td>
+<td class="data row0 col1" id="T_ddb78_row0_col1">0.644000</td>
+<td class="data row0 col2" id="T_ddb78_row0_col2">0.643000</td>
+<td class="data row0 col3" id="T_ddb78_row0_col3">0.647000</td>
+<td class="data row0 col4" id="T_ddb78_row0_col4">0.645000</td>
+<td class="data row0 col5" id="T_ddb78_row0_col5">0.711000</td>
 </tr>
 <tr>
-<th class="row_heading level0 row1" id="T_2cd69_level0_row1">1</th>
-<td class="data row1 col0" id="T_2cd69_row1_col0">Decision Tree</td>
-<td class="data row1 col1" id="T_2cd69_row1_col1">0.550000</td>
-<td class="data row1 col2" id="T_2cd69_row1_col2">0.550000</td>
-<td class="data row1 col3" id="T_2cd69_row1_col3">0.547000</td>
-<td class="data row1 col4" id="T_2cd69_row1_col4">0.549000</td>
-<td class="data row1 col5" id="T_2cd69_row1_col5">0.550000</td>
+<th class="row_heading level0 row1" id="T_ddb78_level0_row1">1</th>
+<td class="data row1 col0" id="T_ddb78_row1_col0">Decision Tree</td>
+<td class="data row1 col1" id="T_ddb78_row1_col1">0.550000</td>
+<td class="data row1 col2" id="T_ddb78_row1_col2">0.550000</td>
+<td class="data row1 col3" id="T_ddb78_row1_col3">0.547000</td>
+<td class="data row1 col4" id="T_ddb78_row1_col4">0.549000</td>
+<td class="data row1 col5" id="T_ddb78_row1_col5">0.550000</td>
 </tr>
 <tr>
-<th class="row_heading level0 row2" id="T_2cd69_level0_row2">2</th>
-<td class="data row2 col0" id="T_2cd69_row2_col0">Decision Tree (max_depth=5)</td>
-<td class="data row2 col1" id="T_2cd69_row2_col1">0.637000</td>
-<td class="data row2 col2" id="T_2cd69_row2_col2">0.647000</td>
-<td class="data row2 col3" id="T_2cd69_row2_col3">0.603000</td>
-<td class="data row2 col4" id="T_2cd69_row2_col4">0.624000</td>
-<td class="data row2 col5" id="T_2cd69_row2_col5">0.691000</td>
+<th class="row_heading level0 row2" id="T_ddb78_level0_row2">2</th>
+<td class="data row2 col0" id="T_ddb78_row2_col0">Decision Tree (max_depth=5)</td>
+<td class="data row2 col1" id="T_ddb78_row2_col1">0.637000</td>
+<td class="data row2 col2" id="T_ddb78_row2_col2">0.647000</td>
+<td class="data row2 col3" id="T_ddb78_row2_col3">0.603000</td>
+<td class="data row2 col4" id="T_ddb78_row2_col4">0.624000</td>
+<td class="data row2 col5" id="T_ddb78_row2_col5">0.691000</td>
 </tr>
 <tr>
-<th class="row_heading level0 row3" id="T_2cd69_level0_row3">3</th>
-<td class="data row3 col0" id="T_2cd69_row3_col0">Random Forest</td>
-<td class="data row3 col1" id="T_2cd69_row3_col1">0.637000</td>
-<td class="data row3 col2" id="T_2cd69_row3_col2">0.640000</td>
-<td class="data row3 col3" id="T_2cd69_row3_col3">0.627000</td>
-<td class="data row3 col4" id="T_2cd69_row3_col4">0.633000</td>
-<td class="data row3 col5" id="T_2cd69_row3_col5">0.699000</td>
+<th class="row_heading level0 row3" id="T_ddb78_level0_row3">3</th>
+<td class="data row3 col0" id="T_ddb78_row3_col0">Random Forest</td>
+<td class="data row3 col1" id="T_ddb78_row3_col1">0.637000</td>
+<td class="data row3 col2" id="T_ddb78_row3_col2">0.640000</td>
+<td class="data row3 col3" id="T_ddb78_row3_col3">0.627000</td>
+<td class="data row3 col4" id="T_ddb78_row3_col4">0.633000</td>
+<td class="data row3 col5" id="T_ddb78_row3_col5">0.699000</td>
 </tr>
 <tr>
-<th class="row_heading level0 row4" id="T_2cd69_level0_row4">4</th>
-<td class="data row4 col0" id="T_2cd69_row4_col0">Random Forest (Tuned)</td>
-<td class="data row4 col1" id="T_2cd69_row4_col1">0.647000</td>
-<td class="data row4 col2" id="T_2cd69_row4_col2">0.648000</td>
-<td class="data row4 col3" id="T_2cd69_row4_col3">0.643000</td>
-<td class="data row4 col4" id="T_2cd69_row4_col4">0.646000</td>
-<td class="data row4 col5" id="T_2cd69_row4_col5">0.710000</td>
+<th class="row_heading level0 row4" id="T_ddb78_level0_row4">4</th>
+<td class="data row4 col0" id="T_ddb78_row4_col0">Random Forest (Tuned)</td>
+<td class="data row4 col1" id="T_ddb78_row4_col1">0.647000</td>
+<td class="data row4 col2" id="T_ddb78_row4_col2">0.648000</td>
+<td class="data row4 col3" id="T_ddb78_row4_col3">0.643000</td>
+<td class="data row4 col4" id="T_ddb78_row4_col4">0.646000</td>
+<td class="data row4 col5" id="T_ddb78_row4_col5">0.710000</td>
 </tr>
 <tr>
-<th class="row_heading level0 row5" id="T_2cd69_level0_row5">5</th>
-<td class="data row5 col0" id="T_2cd69_row5_col0">XGBoost</td>
-<td class="data row5 col1" id="T_2cd69_row5_col1">0.647000</td>
-<td class="data row5 col2" id="T_2cd69_row5_col2">0.645000</td>
-<td class="data row5 col3" id="T_2cd69_row5_col3">0.656000</td>
-<td class="data row5 col4" id="T_2cd69_row5_col4">0.650000</td>
-<td class="data row5 col5" id="T_2cd69_row5_col5">0.699000</td>
+<th class="row_heading level0 row5" id="T_ddb78_level0_row5">5</th>
+<td class="data row5 col0" id="T_ddb78_row5_col0">XGBoost</td>
+<td class="data row5 col1" id="T_ddb78_row5_col1">0.647000</td>
+<td class="data row5 col2" id="T_ddb78_row5_col2">0.645000</td>
+<td class="data row5 col3" id="T_ddb78_row5_col3">0.656000</td>
+<td class="data row5 col4" id="T_ddb78_row5_col4">0.650000</td>
+<td class="data row5 col5" id="T_ddb78_row5_col5">0.699000</td>
 </tr>
 </tbody>
 </table>
@@ -12569,7 +12148,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [488]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [553]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">model_results</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span>
@@ -12586,7 +12165,7 @@ weighted avg       0.65      0.65      0.65      2428
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[488]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[553]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -12692,7 +12271,7 @@ weighted avg       0.65      0.65      0.65      2428
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [489]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [554]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">comparison_plot</span> <span class="o">=</span> <span class="p">(</span>
