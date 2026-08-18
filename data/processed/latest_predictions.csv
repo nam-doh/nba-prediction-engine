@@ -1,3 +1,4 @@
-Game Date,Home Team,Away Team,Home Win Probability,Away Win Probability,Predicted Winner,Prediction Confidence
-2026-10-20,Boston Celtics,Oklahoma City Thunder,0.4940332969342067,0.5059667030657933,Oklahoma City Thunder,0.5059667030657933
-2026-10-20,Los Angeles Lakers,Golden State Warriors,0.6165592080922656,0.3834407919077344,Los Angeles Lakers,0.6165592080922656
+Game Date,Home Team,Away Team,Home Rest Days,Away Rest Days,Home Game Number,Home Win Probability,Away Win Probability,Predicted Winner,Prediction Confidence
+2026-10-20,Boston Celtics,Oklahoma City Thunder,3,3,1,0.4940332969342067,0.5059667030657933,Oklahoma City Thunder,0.5059667030657933
+2026-10-20,Los Angeles Lakers,Golden State Warriors,3,3,1,0.6165592080922656,0.3834407919077344,Los Angeles Lakers,0.6165592080922656
+2026-10-21,New York Knicks,Miami Heat,3,3,1,0.7356971197695475,0.26430288023045245,New York Knicks,0.7356971197695475
