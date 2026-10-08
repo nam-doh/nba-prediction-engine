@@ -302,13 +302,96 @@ nba-prediction-engine/
 
 ## Running Locally
 
-Clone the repository and activate a Python environment.
+### Isolated UI and test environment
 
-Install dependencies:
+Run these commands from the repository root (the managed worktree root also
+works). Preserve the existing `venv`: create a **new**, separate environment
+outside the repository. Tested with Python 3.13.9 on macOS ARM64.
 
 ```bash
-pip install -r requirements.txt
+# Normal checkout; in .automation/worktree use ../../venv/bin/python instead.
+BASE_PYTHON=venv/bin/python
+export UI_ENV="$HOME/.virtualenvs/nba-prediction-ui"
+(
+  set -e
+  test ! -e "$UI_ENV"
+  "$BASE_PYTHON" -m venv "$UI_ENV"
+  "$UI_ENV/bin/python" -m pip install --constraint requirements.txt \
+    streamlit scikit-learn pandas numpy scipy joblib
+  "$UI_ENV/bin/python" -m pip check
+)
 ```
+
+Use a new `UI_ENV` path if that directory already exists; do not overwrite an
+unrelated environment. `--constraint` installs only the UI/test dependency
+closure, using the pins in `requirements.txt`, rather than the full notebook
+toolchain. It does not read packages from the original venv or system Python.
+The critical pins are Streamlit 1.65.0, scikit-learn 1.9.0, pandas 3.0.5,
+NumPy 2.5.1, SciPy 1.17.1, and joblib 1.5.3. The sklearn version matches the
+persisted pipeline; Streamlit 1.50/1.51 require pandas below 3 and are not
+compatible with this dependency declaration. These are version pins, not a
+cross-platform, hash-locked environment.
+
+Validate using that same interpreter, without skips:
+
+```bash
+"$UI_ENV/bin/python" -m unittest discover -s tests -v
+"$UI_ENV/bin/python" scripts/validate.py
+```
+
+The full suite includes real-model inference and Streamlit `AppTest` checks.
+Tests may fit small in-memory research fixtures, but do not retrain or replace
+the production artifact or score the reserved future holdout. An import error
+is a validation failure, not a passing or skipped UI test.
+
+Launch locally with the same interpreter; bind only to loopback and disable
+usage telemetry. An explicit light theme avoids dependence on system-theme
+defaults with this app's light basketball court styling.
+
+```bash
+"$UI_ENV/bin/python" -m streamlit run dashboards/app.py \
+  --server.address 127.0.0.1 --server.port 8513 --server.headless true \
+  --browser.gatherUsageStats false --theme.base light
+```
+
+Open `http://127.0.0.1:8513`. Use an unused port: a pre-existing server was
+listening on 8501 during verification and was left untouched. Do not use an
+unqualified `streamlit` executable: it may come from a different environment
+than the tests.
+
+### Historical source and supported matchups
+
+The UI reads `data/processed/team_game_modeling.csv`, a **precomputed pregame
+feature export dated through 2026-04-12**, and the existing production model.
+It accepts any two different teams among the export's 30 NBA team names
+(435 pairs / 870 home-away orientations), a hypothetical date after the cutoff
+(default 2026-04-13), and integer rest inputs from 0 through 14 for each team.
+It does not verify that a matchup is scheduled or calculate rest from a live
+schedule. Both probabilities come from the persisted scaler/classifier.
+
+T007 remains pending: no rolling/season features are rebuilt from completed
+games. The selected row's stored pregame statistics exclude that row's own
+game result; a row dated April 12 is not a post-April-12 team update. Dates
+after the cutoff do not refresh team state or implement a new-season reset.
+These are static hypothetical comparisons, not validated new-season forecasts.
+See [the inference limitations](docs/inference.md) for the game-number and
+as-of details.
+
+Injuries, lineups, trades, and player availability are unavailable. The 2025-26
+season was repeatedly evaluated previously and is not a pristine holdout.
+The reserved 2026-27 holdout remains unscored.
+
+### Automation validation environment
+
+`scripts/improve.py` currently hardcodes the original checkout's
+`venv/bin/python` for validation. Activating `UI_ENV`, changing `PATH`, or
+launching that script with the UI interpreter **does not override it**.
+The original venv lacks Streamlit, so its full-suite validation remains
+blocked. The UI suite was instead validated in the documented isolated
+environment. Configure the runner to use that compatible interpreter before
+asking it to validate UI tasks; activating `UI_ENV` alone is insufficient.
+
+### Notebook reports
 
 Launch the notebooks:
 

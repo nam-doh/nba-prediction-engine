@@ -65,3 +65,57 @@ opponents, out-of-order rows, current-game contamination, future-row
 contamination, and season-boundary leakage; missing history is explicit rather
 than filled from postgame values. No notebook, dataset, serialized-model, or
 production-prediction changes; document integration points and limitations.
+
+## T008 | pending | Extract a safe reusable pregame inference API
+Files: src/modeling/inference.py, tests/test_inference.py, docs/inference.md
+Acceptance: expose one inference entry point used by both the interface and
+tests; load the existing read-only `models/logistic_regression_production.pkl`
+pipeline without fitting, retraining, calibration, replacement, or fallback
+predictions. Verify that the persisted scaler/classifier pipeline accepts the
+exact ordered 36-feature contract before calling `predict_proba`. Reuse
+T007's as-of feature builder rather than duplicating rolling/opponent logic.
+Require an explicit hypothetical game date and use only team-state and
+schedule/history rows with `GAME_DATE < game_date`; same-date and future rows
+must not affect state, rest, or next-game-number features. Reject identical or
+unknown teams, invalid dates, missing source/model files, missing required
+columns, missing/non-finite feature values, and unavailable team history with
+clear exceptions; never fill those cases with dummy values. Return both
+probabilities plus the source last-available date, each team state date,
+rest-day values, and assumptions metadata. Probabilities must be finite,
+within [0, 1], sum to 1, and identify the home/away orientation. Tests use the
+real persisted model for an end-to-end known matchup and targeted pregame,
+future-row, same-date, invalid-input, missing-data, and no-fit regressions.
+Document that the current historical source is static and that injuries,
+lineups, trades, and player availability are not modeled.
+
+## T009 | done | Build the Streamlit matchup interface
+Files: dashboards/app.py, requirements.txt
+Acceptance: add Streamlit as an explicit runtime dependency and implement a
+small local app that gets its team list, source date, assumptions, and
+probabilities exclusively from the T008 inference API. Provide two distinct
+team selectors, an explicit home-team choice, and a predict action; use a
+validated hypothetical date after the data cutoff rather than silently using
+the wall clock. Display each team's win probability with clear home/away
+labels, the hypothetical date, source last-available date, rest calculation
+assumption, static team-statistics cutoff, and an explicit missing
+injury/lineup-information warning. Historical-data predictions must be
+visibly labeled when current data is unavailable. Surface missing files,
+unknown teams, invalid selections, and inference failures as actionable UI
+errors; do not show stale `latest_predictions.csv` values, fabricate a
+probability, or write model/data artifacts. The app must remain offline and
+must not fetch unvalidated current data.
+
+## T010 | done | Smoke-test and document local launch
+Files: tests/test_streamlit_app.py, README.md
+Acceptance: add a real Streamlit `AppTest` smoke check that launches
+`dashboards/app.py`, selects two different known teams, selects the home team,
+clicks predict, and asserts both rendered probabilities, metadata, and the
+historical-data warning are present. Exercise an invalid/missing-input path
+and assert that no probability is rendered for that request. The smoke test
+uses the persisted model and repository data, performs no network calls, and
+does not write datasets, models, or prediction exports; it must run with the
+declared dependency rather than being silently skipped. Add copy-pasteable
+from-root launch instructions (`streamlit run dashboards/app.py`), dependency
+setup, and the data-cutoff/injury and lineup limitations to the README.
+Run the standard unittest discovery and `scripts/validate.py` without
+executing training or changing notebooks/artifacts.

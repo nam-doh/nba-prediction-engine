@@ -1,19 +1,26 @@
 # Project instructions
 
 Use the existing `venv/bin/python` (Python 3.13.9); do not recreate it or install
-requirements automatically. Installed pandas/sklearn differ from requirements.txt.
+requirements into it automatically. Installed pandas/sklearn differ from
+requirements.txt. When an optional dependency is absent, validation may use a
+separate environment outside the repository without modifying the protected venv.
 The current pipeline lives in notebooks 02/03/06; collection and cleaning scripts
 are under src. Run commands from the repository root.
 
-Preserve all pre-existing edits. Never edit user-dirty files, credentials, venv,
-raw/processed datasets, serialized models, exported HTML, or large artifacts.
-No Git staging, commits, pushes, branch changes, resets, merges, or scheduling
-from a Codex task. The external runner owns Git operations. No sub-agents.
+Preserve all pre-existing edits. Do not edit user-dirty files unless the user
+explicitly assigns those edits to the current task; inspect and preserve their
+intent before changing them. Never edit credentials, venv, raw/processed datasets,
+serialized models, exported HTML, or large artifacts. Git staging, commits, and
+pushes are allowed only when the user explicitly authorizes them and only to the
+named task branch. Never change branches, reset, merge, deploy, or schedule jobs.
+No sub-agents.
 
 Work on exactly the assigned TASKS.md entry and its explicit file allowlist.
-Do not change the runner, validation commands, AGENTS.md, or task allowlists.
-Add evidence and limitations to PROGRESS.md. Do not mark tasks done yourself;
-the runner does that after independent validation.
+Do not change the runner or validation commands. Change AGENTS.md, TASKS.md, or
+task allowlists only when the user explicitly requests it. Add evidence and
+limitations to PROGRESS.md. A task may be marked done only after its acceptance
+criteria and independent validation pass; otherwise leave it pending and record
+the blocker.
 
 Validation: `venv/bin/python -m unittest discover -s tests -v` and
 `venv/bin/python scripts/validate.py`. Add focused regression tests.
