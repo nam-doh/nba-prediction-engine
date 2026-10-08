@@ -27,7 +27,7 @@ hashes and seed. Define candidate gates: lower validation log loss, Brier no
 worse, AUC decrease <=0.005. Exclude exposed 2025-26 from tuning; reserve a new
 future holdout explicitly and do not score it. No candidate promotion here.
 
-## T004 | pending | Verify OMP runner integration
+## T004 | done | Verify OMP runner integration
 Files: tests/test_runner.py
 Acceptance: focused regression coverage proves OMP uses print mode with the
 explicit provider/model and rejects a provider mismatch; record the smoke

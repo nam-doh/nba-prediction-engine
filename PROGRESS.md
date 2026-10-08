@@ -100,3 +100,22 @@
   provenance and external future-outcome exposure are unverified. Metrics are
   dependent paired-row summaries, not independent-game confidence estimates.
   No notebook adoption, data/artifact writes or production model replacement.
+
+## T004 — OMP runner integration evidence — 2026-10-08
+- Added focused regression coverage in `tests/test_runner.py`. The OMP
+  command must use print mode (`-p`), JSON output, noninteractive controls,
+  and the explicit `openai-codex` provider / `gpt-5.6-luna` model. A reported
+  provider mismatch raises `RuntimeError`; advisor execution is absent.
+- Smoke result: local command-construction and provider-log verification passed:
+  `../../venv/bin/python -m unittest tests.test_runner -v` — 7 tests passed.
+  No OMP worker or advisor call was made, per the task restriction.
+- Model/provider recorded for the smoke configuration:
+  `gpt-5.6-luna` / `openai-codex`. Reported token usage: **N/A** because no
+  OMP process was invoked; no live usage value is claimed.
+- Required validation passed:
+  `../../venv/bin/python -m unittest discover -s tests -v` — 22 tests passed;
+  `../../venv/bin/python scripts/validate.py` — syntax and notebook structure
+  valid, with no training/holdout execution. `TASKS.md` was unchanged; no Git
+  mutations, dataset/model/notebook changes, or environment installs occurred.
+- Limitation: this verifies runner wiring and fail-closed provider checking, not
+  live OMP authentication, network execution, or token accounting.

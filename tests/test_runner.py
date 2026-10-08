@@ -3,8 +3,8 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from scripts.improve import (DEFAULT_OMP_MODEL, DEFAULT_OMP_PROVIDER, FATAL,
-                             agent_command, run, scope, tasks, verify_agent_log)
+from scripts.improve import (FATAL, agent_command, run, scope, tasks,
+                              verify_agent_log)
 
 
 class RunnerTests(unittest.TestCase):
@@ -18,13 +18,17 @@ class RunnerTests(unittest.TestCase):
             self.assertTrue(FATAL.search(message))
 
 
-    def test_omp_command_is_explicit_and_noninteractive(self):
-        command = agent_command('omp', 'prompt', Path('/tmp/worktree'))
-        self.assertEqual(command[:5],
-                         ['omp', '--provider', DEFAULT_OMP_PROVIDER, '--model',
-                          DEFAULT_OMP_MODEL])
-        self.assertIn('-p', command)
-        self.assertIn('--no-session', command)
+    def test_omp_command_uses_print_mode_with_explicit_selection(self):
+        provider = 'openai-codex'
+        model = 'gpt-5.6-luna'
+        command = agent_command('omp', 'prompt', Path('/tmp/worktree'),
+                                provider, model)
+        self.assertEqual(command, [
+            'omp', '--provider', provider, '--model', model,
+            '--cwd', '/tmp/worktree', '--mode', 'json', '--no-session',
+            '--no-extensions', '--no-skills', '--no-pty',
+            '--approval-mode', 'yolo', '-p', 'prompt',
+        ])
         self.assertNotIn('--advisor', command)
 
     def test_omp_log_must_report_requested_provider(self):
