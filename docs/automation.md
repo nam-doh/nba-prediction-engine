@@ -24,12 +24,13 @@ explicit command-line choice.
 The runner uses `.automation/worktree` on `automation/nba-improvements`, an
 exclusive flock, and `.automation/logs/<timestamp>-<pid>/`. Original working
 changes are never copied into the worktree. New task files are explicitly
-allowlisted. Agent attempts use `codex exec --sandbox workspace-write` or OMP
-print mode; privileged requests fail rather than prompting. Git
-commit/push are executed only by this external supervisor. No force-push or
-merge commands exist. Non-fast-forward pushes stop the session; inspect and
-reconcile manually. A failed push leaves the validated local commit; after
-review, retry `git -C .automation/worktree push origin HEAD:automation/nba-improvements`.
+allowlisted. Codex attempts use `codex exec --sandbox workspace-write`; Codex
+privileged requests fail rather than prompting. OMP attempts use its print mode
+inside the isolated worktree, and the task prompt forbids Git mutations,
+advisor calls, and worker calls. Git commit/push are executed only by this
+external supervisor. No force-push or merge commands exist. Non-fast-forward
+pushes stop the session; inspect and reconcile manually. A failed push leaves
+the validated local commit; after review, retry `git -C .automation/worktree push origin HEAD:automation/nba-improvements`.
 
 Default deadline is 900 seconds per task, including attempts and validation.
 There are at most two repairs after the first attempt; timeout or authentication/
