@@ -183,7 +183,7 @@ Handle report revisions, ambiguous names, rate limits, cache hits, and source
 failures. Use conservative requests, honor published terms/robots, do not bypass
 controls, and add fixture tests plus an explicitly labeled live probe.
 
-## T016 | pending | Add a provenance-safe player-news lookup
+## T016 | done | Add a provenance-safe player-news lookup
 Files: src/data_collection/player_data/news.py, scripts/player_news.py, tests/test_player_news.py, docs/player-news.md
 Depends: T011, T012, T013, T015. Runtime dependency: existing `requests`; optional provider key via environment only.
 Acceptance: look up recent relevant items by stable player ID or normalized

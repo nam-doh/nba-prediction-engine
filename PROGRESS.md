@@ -440,3 +440,17 @@
   Prospective refresh requires an actual published URL. This late-collected
   historical probe cannot supply pregame backtesting availability. No current
   status, player ID for an ambiguous name, or fallback record was fabricated.
+
+## T016 — provenance-safe optional news — 2026-10-08
+- Added stable-ID/name GNews lookup, immutable raw/normalized snapshots, six-hour
+  caching, publication/retrieval times and conservative body-only explicit-status
+  extraction. Headline-only, negated, speculative and conflicting text remains
+  unclassified. Claims never become official/current availability; stale age is
+  recomputed even on cache hits. Future/unrelated articles are excluded.
+- Three focused tests and full isolated discovery (78 tests) passed; protected
+  syntax/notebook validation passed. Actual CLI without credentials exited 1
+  with actionable GNEWS_API_KEY error and unknown availability. Fixture-populated
+  cached CLI smoke returned unconfirmed `out`, supporting text and source times,
+  `current_availability: null`, and `from_cache: true`.
+- Live news access remains unverified: no GNews key is available. No credentials,
+  production data/model changes or holdout execution. No LLM/article scraping.
