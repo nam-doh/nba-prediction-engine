@@ -1,0 +1,35 @@
+test_cardinality_identity_and_coverage (test_audit_leakage.LeakageAuditTests.test_cardinality_identity_and_coverage) ... ok
+test_cli_read_only_and_failure_exit (test_audit_leakage.LeakageAuditTests.test_cli_read_only_and_failure_exit) ... ok
+test_cumulative_opponent_difference_and_missingness_contamination (test_audit_leakage.LeakageAuditTests.test_cumulative_opponent_difference_and_missingness_contamination) ... ok
+test_current_game_contamination (test_audit_leakage.LeakageAuditTests.test_current_game_contamination) ... ok
+test_exported_date_must_match_source (test_audit_leakage.LeakageAuditTests.test_exported_date_must_match_source) ... ok
+test_temporal_and_schema_failures (test_audit_leakage.LeakageAuditTests.test_temporal_and_schema_failures) ... ok
+test_unsorted_valid_season_reset_window_and_read_only (test_audit_leakage.LeakageAuditTests.test_unsorted_valid_season_reset_window_and_read_only) ... ok
+test_exposed_and_future_values_never_affect_fit_or_scores (test_baseline.BaselineTests.test_exposed_and_future_values_never_affect_fit_or_scores) ... ok
+test_frozen_gates (test_baseline.BaselineTests.test_frozen_gates) ... ok
+test_invalid_inputs_fail_closed (test_baseline.BaselineTests.test_invalid_inputs_fail_closed) ... ok
+test_pair_filtering_and_same_date_partition (test_baseline.BaselineTests.test_pair_filtering_and_same_date_partition) ... ok
+test_train_only_scaler_and_untouched_input (test_baseline.BaselineTests.test_train_only_scaler_and_untouched_input) ... ok
+test_boundaries_pairs_and_same_date (test_chronological.ChronologicalTests.test_boundaries_pairs_and_same_date) ... ok
+test_invalid_missing_and_inconsistent (test_chronological.ChronologicalTests.test_invalid_missing_and_inconsistent) ... /Users/namle/Documents/GitHub/nba-prediction-engine/.automation/worktree/src/modeling/chronological.py:7: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  dates = pd.to_datetime(frame['GAME_DATE'], errors='raise')
+ok
+test_reversed_or_empty (test_chronological.ChronologicalTests.test_reversed_or_empty) ... ok
+test_exposed_and_future_rows_are_not_evaluated (test_evaluation_report.EvaluationReportTests.test_exposed_and_future_rows_are_not_evaluated) ... ok
+test_invalid_inputs_and_mixed_partitions_fail_closed (test_evaluation_report.EvaluationReportTests.test_invalid_inputs_and_mixed_partitions_fail_closed) ... /Users/namle/Documents/GitHub/nba-prediction-engine/.automation/worktree/scripts/baseline.py:43: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  dates = pd.to_datetime(frame['GAME_DATE'], errors='raise')
+ok
+test_repeated_snapshot_is_byte_identical_and_complete (test_evaluation_report.EvaluationReportTests.test_repeated_snapshot_is_byte_identical_and_complete) ... ok
+test_source_payload_is_not_mutated (test_evaluation_report.EvaluationReportTests.test_source_payload_is_not_mutated) ... ok
+test_fatal (test_runner.RunnerTests.test_fatal) ... ok
+test_lock (test_runner.RunnerTests.test_lock) ... ok
+test_omp_command_uses_print_mode_with_explicit_selection (test_runner.RunnerTests.test_omp_command_uses_print_mode_with_explicit_selection) ... ok
+test_omp_log_must_report_requested_provider (test_runner.RunnerTests.test_omp_log_must_report_requested_provider) ... ok
+test_queue (test_runner.RunnerTests.test_queue) ... ok
+test_scope (test_runner.RunnerTests.test_scope) ... ok
+test_timeout (test_runner.RunnerTests.test_timeout) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 0.226s
+
+OK

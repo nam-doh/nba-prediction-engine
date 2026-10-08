@@ -1,0 +1,15 @@
+test_boundaries_pairs_and_same_date (test_chronological.ChronologicalTests.test_boundaries_pairs_and_same_date) ... ok
+test_invalid_missing_and_inconsistent (test_chronological.ChronologicalTests.test_invalid_missing_and_inconsistent) ... /Users/namle/Documents/GitHub/nba-prediction-engine/.automation/worktree/src/modeling/chronological.py:7: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  dates = pd.to_datetime(frame['GAME_DATE'], errors='raise')
+ok
+test_reversed_or_empty (test_chronological.ChronologicalTests.test_reversed_or_empty) ... ok
+test_fatal (test_runner.RunnerTests.test_fatal) ... ok
+test_lock (test_runner.RunnerTests.test_lock) ... ok
+test_queue (test_runner.RunnerTests.test_queue) ... ok
+test_scope (test_runner.RunnerTests.test_scope) ... ok
+test_timeout (test_runner.RunnerTests.test_timeout) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 0.066s
+
+OK

@@ -1,0 +1,20 @@
+{
+  "completed_tasks": [
+    "T006 implementation validated and published",
+    "bounded runner recovery"
+  ],
+  "commits": [
+    "a552db2",
+    "a6d9f4e"
+  ],
+  "branch": "automation/nba-improvements",
+  "tests_passed": 44,
+  "validation": "structural validation and read-only leakage audit passed",
+  "blocker": "User-owned TASKS.md and PROGRESS.md edits deliberately remain uncommitted; no unfinished run record identifies them as automation work.",
+  "next_action": "Owner must resolve those edits and reconcile already-published T006 pending status before launch.",
+  "limitations": [
+    "Recovery transitions tested using mocked agent and publication calls; no new live OMP task launched.",
+    "Original checkout and user-dirty PROGRESS.md preserved; evidence saved here instead.",
+    "No provenance-based automatic adoption of legacy dirty work without a matching run record."
+  ]
+}

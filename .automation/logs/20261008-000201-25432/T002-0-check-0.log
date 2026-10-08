@@ -1,0 +1,22 @@
+test_cardinality_identity_and_coverage (test_audit_leakage.LeakageAuditTests.test_cardinality_identity_and_coverage) ... ok
+test_cli_read_only_and_failure_exit (test_audit_leakage.LeakageAuditTests.test_cli_read_only_and_failure_exit) ... ok
+test_cumulative_opponent_difference_and_missingness_contamination (test_audit_leakage.LeakageAuditTests.test_cumulative_opponent_difference_and_missingness_contamination) ... ok
+test_current_game_contamination (test_audit_leakage.LeakageAuditTests.test_current_game_contamination) ... ok
+test_exported_date_must_match_source (test_audit_leakage.LeakageAuditTests.test_exported_date_must_match_source) ... ok
+test_temporal_and_schema_failures (test_audit_leakage.LeakageAuditTests.test_temporal_and_schema_failures) ... ok
+test_unsorted_valid_season_reset_window_and_read_only (test_audit_leakage.LeakageAuditTests.test_unsorted_valid_season_reset_window_and_read_only) ... ok
+test_boundaries_pairs_and_same_date (test_chronological.ChronologicalTests.test_boundaries_pairs_and_same_date) ... ok
+test_invalid_missing_and_inconsistent (test_chronological.ChronologicalTests.test_invalid_missing_and_inconsistent) ... /Users/namle/Documents/GitHub/nba-prediction-engine/.automation/worktree/src/modeling/chronological.py:7: UserWarning: Could not infer format, so each element will be parsed individually, falling back to `dateutil`. To ensure parsing is consistent and as-expected, please specify a format.
+  dates = pd.to_datetime(frame['GAME_DATE'], errors='raise')
+ok
+test_reversed_or_empty (test_chronological.ChronologicalTests.test_reversed_or_empty) ... ok
+test_fatal (test_runner.RunnerTests.test_fatal) ... ok
+test_lock (test_runner.RunnerTests.test_lock) ... ok
+test_queue (test_runner.RunnerTests.test_queue) ... ok
+test_scope (test_runner.RunnerTests.test_scope) ... ok
+test_timeout (test_runner.RunnerTests.test_timeout) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.082s
+
+OK

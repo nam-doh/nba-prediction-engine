@@ -1,0 +1,28 @@
+[
+  [
+    "T001",
+    "Add chronological partition guard",
+    [
+      "src/modeling/chronological.py",
+      "tests/test_chronological.py"
+    ]
+  ],
+  [
+    "T002",
+    "Audit historical pregame leakage",
+    [
+      "docs/leakage-audit.md",
+      "scripts/audit_leakage.py",
+      "tests/test_audit_leakage.py"
+    ]
+  ],
+  [
+    "T003",
+    "Freeze chronological evaluation protocol",
+    [
+      "docs/evaluation-protocol.md",
+      "scripts/baseline.py",
+      "tests/test_baseline.py"
+    ]
+  ]
+]
