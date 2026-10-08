@@ -128,6 +128,24 @@ class InferenceTests(unittest.TestCase):
             pd.DataFrame(classifier.coef_),
         )
 
+    def test_automatic_rest_reconstruction_and_season_boundary(self):
+        result = self.engine.predict_matchup("Boston Celtics", "Oklahoma City Thunder", self.game_date)
+        self.assertEqual(result.home_rest_days, 1)
+        with self.assertRaises(InferenceError):
+            self.engine.predict_matchup("Boston Celtics", "Oklahoma City Thunder", "2026-10-20")
+
+    def test_exported_features_ignored_and_raw_missing_history_rejected(self):
+        history = pd.read_csv(DEFAULT_DATA_PATH)
+        baseline = self.engine.predict_matchup("Boston Celtics", "Oklahoma City Thunder", self.game_date)
+        history["PTS_ROLL5"] = 999999
+        engine = InferenceEngine(history, self.engine._model, DEFAULT_MODEL_PATH)
+        self.assertEqual(engine.predict_matchup("Boston Celtics", "Oklahoma City Thunder", self.game_date).home_win_probability,
+                         baseline.home_win_probability)
+        history.loc[history.TEAM_NAME == "Boston Celtics", "PTS"] = float("nan")
+        with self.assertRaises(InferenceError):
+            InferenceEngine(history, self.engine._model, DEFAULT_MODEL_PATH).predict_matchup(
+                "Boston Celtics", "Oklahoma City Thunder", self.game_date)
+
 
 if __name__ == "__main__":
     unittest.main()

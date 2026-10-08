@@ -399,3 +399,27 @@
   verified. T015 must audit and collect timestamped reports going forward;
   unavailable history stays missing. The 2025-26 probe was ingestion-only and
   did not fit, tune, predict, or score the exposed period or reserved holdout.
+
+## T007 — canonical construction — 2026-10-08
+- Implemented raw completed-game rolling, season, elapsed-day rest and one-to-one
+  opponent features. Same-date games are excluded together; new-season missing
+  history stays NaN. Duplicate/missing opponents and unsorted histories fail.
+- Four focused regressions passed; full isolated discovery passed 70 tests;
+  protected-interpreter `scripts/validate.py` passed. Independent in-memory
+  smoke printed correct paired 11/12 point rolling values, two-day rest and
+  missing first-game/new-season features. No data/model/holdout writes.
+- Calendar-date reconstruction cannot establish upstream publication timestamps.
+
+## T008 — canonical inference cutover — 2026-10-08
+- Reused T007 state/opponent construction; removed duplicated/stale precomputed
+  assembly. Verified exact scaler/classifier feature/class contract. Automatic
+  elapsed-day rest is the default; explicit overrides remain labeled scenarios.
+  Subsequent seasons without history fail closed.
+- Source inspection found one missing FT_PCT. Rolling means preserve the audited
+  skip-missing convention; wholly missing feature windows fail inference.
+- Eight inference regressions and full isolated discovery passed (72 tests).
+  Protected-interpreter syntax/notebook validation passed. Direct real-model
+  Boston/OKC smoke on 2026-04-13 returned 0.6135600271453063 and its complement,
+  April 12 states and one elapsed rest day. No training or holdout scoring.
+- T007/T008 marked done only after independent validation. T006 implementation
+  and its six tests were reused unchanged; no duplicate reliability module.

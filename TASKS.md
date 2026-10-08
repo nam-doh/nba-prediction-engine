@@ -56,7 +56,7 @@ missing probabilities, and incomplete game pairs. No calibrator fitting,
 candidate promotion, holdout scoring, dataset mutation, or production artifact
 replacement.
 
-## T007 | pending | Enforce as-of pregame feature construction
+## T007 | done | Enforce as-of pregame feature construction
 Files: src/modeling/pregame_features.py, tests/test_pregame_features.py, docs/pregame-features.md
 Acceptance: reusable in-memory builder computes rolling, cumulative, rest-day,
 and opponent features strictly from earlier games, excludes every same-date
@@ -66,7 +66,7 @@ contamination, and season-boundary leakage; missing history is explicit rather
 than filled from postgame values. No notebook, dataset, serialized-model, or
 production-prediction changes; document integration points and limitations.
 
-## T008 | pending | Extract a safe reusable pregame inference API
+## T008 | done | Extract a safe reusable pregame inference API
 Files: src/modeling/inference.py, tests/test_inference.py, docs/inference.md
 Acceptance: expose one inference entry point used by both the interface and
 tests; load the existing read-only `models/logistic_regression_production.pkl`

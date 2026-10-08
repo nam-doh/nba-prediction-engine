@@ -9,6 +9,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
+from .pregame_features import REQUIRED, matchup_features, team_state, validate_history
+
 
 FEATURE_COLUMNS = (
     "HOME_GAME",
@@ -49,28 +51,6 @@ FEATURE_COLUMNS = (
     "REST_DAYS_DIFF",
 )
 
-TEAM_STAT_COLUMNS = (
-    "PTS_ROLL5",
-    "FG_PCT_ROLL5",
-    "FG3_PCT_ROLL5",
-    "FT_PCT_ROLL5",
-    "REB_ROLL5",
-    "AST_ROLL5",
-    "STL_ROLL5",
-    "BLK_ROLL5",
-    "TOV_ROLL5",
-    "PLUS_MINUS_ROLL5",
-    "WIN_PCT_ROLL5",
-)
-
-REQUIRED_HISTORY_COLUMNS = (
-    "TEAM_NAME",
-    "GAME_ID",
-    "GAME_DATE",
-    "TEAM_GAME_NUMBER",
-    "SEASON_WIN_PCT",
-    *TEAM_STAT_COLUMNS,
-)
 
 DEFAULT_DATA_PATH = Path(__file__).resolve().parents[2] / "data/processed/team_game_modeling.csv"
 DEFAULT_MODEL_PATH = Path(__file__).resolve().parents[2] / "models/logistic_regression_production.pkl"
@@ -153,8 +133,8 @@ class InferenceEngine:
     @property
     def assumptions(self) -> Mapping[str, str]:
         return {
-            "Historical source": "Static team-game feature export; no live data is fetched.",
-            "Rest days": "The matchup uses the user-provided whole-number rest inputs (0–14 days).",
+            "Historical source": "Static completed-game statistics rebuilt strictly before the game date.",
+            "Rest days": "Elapsed calendar days from prior same-season games; explicit overrides are hypothetical scenarios.",
             "Player availability": "Injuries, lineups, trades, and player availability are not modeled.",
             "Probability meaning": "Win probabilities are historical-data estimates, not guarantees.",
         }
@@ -164,8 +144,8 @@ class InferenceEngine:
         home_team: str,
         away_team: str,
         game_date: Any,
-        home_rest_days: Any,
-        away_rest_days: Any,
+        home_rest_days: Any = None,
+        away_rest_days: Any = None,
     ) -> Prediction:
         """Predict a hypothetical game using only rows strictly before ``game_date``."""
         game_date = _parse_game_date(game_date)
@@ -178,19 +158,25 @@ class InferenceEngine:
         unknown = sorted({home_team, away_team}.difference(self._teams))
         if unknown:
             raise InferenceError(f"Unknown team selection: {', '.join(unknown)}")
-        home_rest_days = _parse_rest_days(home_rest_days, "Home")
-        away_rest_days = _parse_rest_days(away_rest_days, "Away")
-
-        home_state = self._state_before(home_team, game_date)
-        away_state = self._state_before(away_team, game_date)
-        features = _build_matchup_features(
-            home_state,
-            away_state,
-            home_rest_days,
-            away_rest_days,
-            self._history,
-            game_date,
-        )
+        try:
+            prior = validate_history(self._history[self._history.GAME_DATE < game_date])
+            year = game_date.year if game_date.month >= 7 else game_date.year - 1
+            season = f"{year}-{str(year + 1)[-2:]}"
+            home_state = team_state(prior, home_team, game_date, season)
+            away_state = team_state(prior, away_team, game_date, season)
+            for state in (home_state, away_state):
+                if pd.isna(state["GAME_DATE"]):
+                    raise ValueError(f"No historical team state for {state['TEAM_NAME']} in {season}")
+        except ValueError as exc:
+            raise InferenceError(str(exc)) from exc
+        home_rest_days = int(home_state["REST_DAYS"]) if home_rest_days is None else _parse_rest_days(home_rest_days, "Home")
+        away_rest_days = int(away_state["REST_DAYS"]) if away_rest_days is None else _parse_rest_days(away_rest_days, "Away")
+        home_state["REST_DAYS"] = home_rest_days
+        away_state["REST_DAYS"] = away_rest_days
+        row = matchup_features(home_state, away_state)
+        features = pd.DataFrame([[row[c] for c in FEATURE_COLUMNS]], columns=FEATURE_COLUMNS)
+        if not np.isfinite(features.to_numpy(dtype=float)).all():
+            raise InferenceError("The matchup contains missing or non-finite model features.")
         probabilities = self._model.predict_proba(features)
         classes = np.asarray(self._model.classes_)
         positive_positions = np.flatnonzero(classes == 1)
@@ -228,31 +214,14 @@ class InferenceEngine:
             assumptions=self.assumptions,
         )
 
-    def _state_before(self, team: str, game_date: pd.Timestamp) -> pd.Series:
-        prior = self._history[
-            (self._history["TEAM_NAME"] == team)
-            & (self._history["GAME_DATE"] < game_date)
-        ].sort_values(["GAME_DATE", "GAME_ID"])
-        if prior.empty:
-            raise InferenceError(
-                f"No historical team state is available for {team} before {game_date.date()}."
-            )
-        state = prior.iloc[-1]
-        required_state = ["SEASON_WIN_PCT", "TEAM_GAME_NUMBER", *TEAM_STAT_COLUMNS]
-        values = pd.to_numeric(state[required_state], errors="coerce")
-        if values.isna().any() or not np.isfinite(values.to_numpy(dtype=float)).all():
-            missing = [column for column in required_state if pd.isna(values[column])]
-            detail = ", ".join(missing) if missing else "non-finite feature values"
-            raise InferenceError(f"Historical state for {team} is unavailable: {detail}.")
-        return state
 
 
 def predict_matchup(
     home_team: str,
     away_team: str,
     game_date: Any,
-    home_rest_days: Any,
-    away_rest_days: Any,
+    home_rest_days: Any = None,
+    away_rest_days: Any = None,
     *,
     data_path: str | Path = DEFAULT_DATA_PATH,
     model_path: str | Path = DEFAULT_MODEL_PATH,
@@ -271,7 +240,7 @@ def predict_matchup(
 def _validate_history(history: pd.DataFrame) -> pd.DataFrame:
     if history.empty:
         raise InferenceError("Historical feature data is empty.")
-    missing = sorted(set(REQUIRED_HISTORY_COLUMNS).difference(history.columns))
+    missing = sorted(set(REQUIRED).difference(history.columns))
     if missing:
         raise InferenceError(f"Historical feature data is missing columns: {', '.join(missing)}")
     checked = history.copy()
@@ -296,6 +265,17 @@ def _validate_model(model: Any) -> Any:
     named_steps = getattr(model, "named_steps", {})
     if not {"scaler", "classifier"}.issubset(named_steps):
         raise InferenceError("The persisted production model must contain scaler and classifier steps.")
+    from sklearn.pipeline import Pipeline
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LogisticRegression
+    if not isinstance(model, Pipeline) or tuple(named_steps) != ("scaler", "classifier"):
+        raise InferenceError("Expected exactly the persisted scaler/classifier pipeline.")
+    scaler, classifier = named_steps["scaler"], named_steps["classifier"]
+    if (not isinstance(scaler, StandardScaler) or not isinstance(classifier, LogisticRegression)
+            or tuple(getattr(scaler, "feature_names_in_", ())) != FEATURE_COLUMNS
+            or getattr(classifier, "n_features_in_", None) != len(FEATURE_COLUMNS)
+            or tuple(model.classes_) != (0, 1)):
+        raise InferenceError("Invalid scaler/classifier feature or class contract.")
     return model
 
 
@@ -322,54 +302,3 @@ def _parse_rest_days(value: Any, label: str) -> int:
     return int(numeric)
 
 
-def _build_matchup_features(
-    home_state: pd.Series,
-    away_state: pd.Series,
-    home_rest_days: int,
-    away_rest_days: int,
-    history: pd.DataFrame,
-    game_date: pd.Timestamp,
-) -> pd.DataFrame:
-    row: dict[str, float | int] = {
-        "HOME_GAME": 1,
-        "REST_DAYS": home_rest_days,
-        "SEASON_WIN_PCT": float(home_state["SEASON_WIN_PCT"]),
-        "TEAM_GAME_NUMBER": _next_team_game_number(home_state, history, game_date),
-        "OPP_REST_DAYS": away_rest_days,
-    }
-    for stat in TEAM_STAT_COLUMNS:
-        row[stat] = float(home_state[stat])
-        row[f"OPP_{stat}"] = float(away_state[stat])
-
-    diff_sources = {
-        "PTS_ROLL5_DIFF": ("PTS_ROLL5", "OPP_PTS_ROLL5"),
-        "FG_PCT_ROLL5_DIFF": ("FG_PCT_ROLL5", "OPP_FG_PCT_ROLL5"),
-        "FG3_PCT_ROLL5_DIFF": ("FG3_PCT_ROLL5", "OPP_FG3_PCT_ROLL5"),
-        "REB_ROLL5_DIFF": ("REB_ROLL5", "OPP_REB_ROLL5"),
-        "AST_ROLL5_DIFF": ("AST_ROLL5", "OPP_AST_ROLL5"),
-        "TOV_ROLL5_DIFF": ("TOV_ROLL5", "OPP_TOV_ROLL5"),
-        "PLUS_MINUS_ROLL5_DIFF": ("PLUS_MINUS_ROLL5", "OPP_PLUS_MINUS_ROLL5"),
-        "WIN_PCT_ROLL5_DIFF": ("WIN_PCT_ROLL5", "OPP_WIN_PCT_ROLL5"),
-    }
-    for difference, (team_column, opponent_column) in diff_sources.items():
-        row[difference] = row[team_column] - row[opponent_column]
-    row["REST_DAYS_DIFF"] = home_rest_days - away_rest_days
-    features = pd.DataFrame([[row[column] for column in FEATURE_COLUMNS]], columns=FEATURE_COLUMNS)
-    values = features.to_numpy(dtype=float)
-    if not np.isfinite(values).all():
-        raise InferenceError("The matchup contains missing or non-finite model features.")
-    return features
-
-
-def _next_team_game_number(
-    state: pd.Series,
-    history: pd.DataFrame,
-    game_date: pd.Timestamp,
-) -> int:
-    prior = history[
-        (history["TEAM_NAME"] == state["TEAM_NAME"])
-        & (history["GAME_DATE"] < game_date)
-    ]
-    if "SEASON" in history.columns and not pd.isna(state.get("SEASON")):
-        prior = prior[prior["SEASON"] == state["SEASON"]]
-    return int(len(prior) + 1)
