@@ -345,3 +345,57 @@
   Streamlit. This does not block the separately validated local UI, but runner
   UI validation requires a future authorized configuration change. No model,
   dataset, notebook, or holdout was changed or scored.
+
+## T011–T014 — player source, snapshots, rosters, and statistics — 2026-10-08
+- Added runner-format T011–T020 entries with explicit file allowlists and
+  dependencies. T011–T014 are complete after focused and full independent
+  validation; T015–T020 remain pending. The backlog orders official
+  availability and news before contribution modeling, chronological candidate
+  evaluation, inference integration, and UI integration.
+- `docs/player-data-sources.md` records primary documentation, current cost,
+  authentication, quotas, permitted-use constraints, history, freshness, and
+  observed access for NBA.com, official NBA injury PDFs, BALLDONTLIE,
+  TheSportsDB, GNews, and unentitled commercial alternatives. NBA.com numeric
+  IDs were selected. NBA.com roster/stats endpoints require no key; the future
+  optional GNews adapter requires `GNEWS_API_KEY` and its free plan is limited
+  to development/testing, 100 requests/day, a 12-hour delay, and 30 days of
+  history. No subscription or payment-backed trial was used.
+- Added a dependency-free immutable JSON snapshot store with UTC retrieval and
+  optional source-as-of timestamps, request/source provenance, raw and
+  normalized payloads, SHA-256 verification, deterministic JSON, atomic
+  no-overwrite publication, credential query redaction, exact-request latest
+  lookup, corruption/path validation, and `data/snapshots/` Git exclusion.
+  Production defaults write ignored runtime state; tests and live probes wrote
+  only to temporary directories.
+- Added injectable `commonteamroster` and league-wide `playergamelogs` adapters
+  plus refresh CLIs. Rosters preserve NBA player/team IDs, permit duplicate
+  names and cross-snapshot trade memberships, cache for one hour, default to a
+  three-second inter-request delay, retain successful team snapshots on partial
+  failure, and exit nonzero when any requested team fails. Player logs preserve
+  textual game IDs, ISO dates, historical team IDs, minutes/core box scores,
+  and six-hour exact-request caching. Both reject malformed/duplicate required
+  identities and never fabricate fallback data.
+- **Live verified:** one official NBA.com Boston `2026-27` roster request
+  returned 21 normalized rows at `2026-10-08T17:13:25.292463Z`; one official
+  NBA.com `2025-26` regular-season player-log request returned 26,651 rows at
+  `2026-10-08T17:13:51.108356Z`. Repeating each refresh without `--force`
+  returned the same snapshot as a cache hit without network. A TheSportsDB
+  free-key probe returned only 10 NBA teams, confirming that it is not a
+  complete primary roster source. Live payloads remain under
+  `/tmp/nba-player-live-probe` and were not staged.
+- Fixture validation with the protected `../../venv/bin/python` passed 14
+  focused tests covering snapshot immutability/corruption/redaction, duplicate
+  names and trades, partial failures, cache behavior, CLI exit/reporting,
+  temporal fields, optional statistics, invalid data, and no fallback.
+  Full validation in the separate compatible Python 3.13 UI environment passed
+  all 66 tests with no skips; `scripts/validate.py` passed. No dependency was
+  installed into the protected venv.
+- Limitations: NBA stats endpoints have no published API SLA or rate limit and
+  NBA terms restrict public/commercial reuse of Basketball Content; raw
+  snapshots must not be committed or redistributed. A roster snapshot proves
+  membership only at retrieval time and cannot be applied retrospectively.
+  Player logs contain no historical pregame injury state. An official injury
+  PDF was live-accessible, but no complete public historical report index was
+  verified. T015 must audit and collect timestamped reports going forward;
+  unavailable history stays missing. The 2025-26 probe was ingestion-only and
+  did not fit, tune, predict, or score the exposed period or reserved holdout.

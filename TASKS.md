@@ -119,3 +119,122 @@ from-root launch instructions (`streamlit run dashboards/app.py`), dependency
 setup, and the data-cutoff/injury and lineup limitations to the README.
 Run the standard unittest discovery and `scripts/validate.py` without
 executing training or changing notebooks/artifacts.
+
+## T011 | done | Document player-data source selection
+Files: docs/player-data-sources.md
+Depends: none.
+Acceptance: compare primary documentation and observed access for current NBA
+rosters/stable IDs, player game logs/season statistics, timestamped official
+availability, news, and historical roster/injury backtesting. Record coverage,
+freshness, historical availability, cost, authentication, published rate
+limits, permitted-use constraints, source URLs, probe dates, and whether each
+sample was live-verified or only fixture-tested. Select usable no-purchase
+sources, document exact key setup where required, and do not claim access to an
+endpoint that was not verified. Evaluate official NBA injury reports and any
+robots/terms constraints; prefer structured reports over article scraping.
+
+## T012 | done | Add immutable player-data snapshot storage
+Files: .gitignore, src/__init__.py, src/data_collection/__init__.py, src/data_collection/player_data/__init__.py, src/data_collection/player_data/contracts.py, src/data_collection/player_data/snapshots.py, tests/test_player_snapshots.py, docs/player-snapshots.md
+Depends: T011.
+Acceptance: add normalized provenance contracts and an immutable JSON snapshot
+store with UTC retrieval timestamps, provider/dataset/request metadata, source
+URL, optional source-as-of time, normalized records, raw payload, content hash,
+atomic writes, safe path components, deterministic serialization, and latest
+snapshot lookup. Reject naive timestamps, path traversal, corrupt snapshots,
+and attempted overwrite with different content. Redact common credential query
+parameters from stored source URLs. Tests use only temporary directories and
+perform no network, dataset, model, notebook, or production-artifact writes.
+
+## T013 | done | Ingest current NBA rosters
+Files: src/data_collection/player_data/rosters.py, scripts/refresh_rosters.py, tests/test_rosters.py, docs/rosters.md
+Depends: T011, T012. Runtime dependency: existing `nba_api` package.
+Acceptance: implement an injectable NBA roster adapter using stable numeric team
+and player IDs, season, normalized name/position/jersey, source URL, retrieval
+time, and timestamped raw-plus-normalized snapshots. Preserve separate
+player-team memberships for trades, allow duplicate names, reject duplicate
+identity rows and malformed required fields, and report per-team source failures
+without inventing records or discarding successful snapshots. The refresh CLI
+supports one or all 30 teams, defaults to a conservative inter-request delay,
+keeps API keys out of Git, and exits nonzero on partial failure. Fixture tests
+cover normalization, trades/names, caching, malformed responses, and failure
+retention; document live-verification status and current-roster-only limits.
+
+## T014 | done | Ingest NBA player game statistics
+Files: src/data_collection/player_data/statistics.py, scripts/refresh_player_stats.py, tests/test_player_stats.py, docs/player-stats.md
+Depends: T011, T012. Runtime dependency: existing `nba_api` package.
+Acceptance: implement an injectable season player-game-log adapter with stable
+player/team/game IDs, game date, season/type, minutes and core box-score fields,
+source URL, retrieval time, and timestamped raw-plus-normalized snapshots.
+Preserve traded-team IDs, allow duplicate names, reject duplicate game-player
+identities, invalid dates/minutes/required IDs, and provider failures without
+fallback data. The refresh CLI accepts an explicit season/type and performs no
+model training. Tests are network-free fixtures and prove temporal fields,
+missing optional values, validation, and immutable snapshot provenance;
+document live-verification status and strict pregame-use requirements.
+
+## T015 | pending | Ingest official player availability
+Files: requirements.txt, src/data_collection/player_data/availability.py, scripts/refresh_availability.py, tests/test_availability.py, docs/availability.md
+Depends: T011, T012, T013. Runtime dependency: declare the selected PDF/parser package.
+Acceptance: ingest timestamped official NBA injury reports from their structured
+PDF publication flow, preserving report time, game/team/player IDs where
+available, normalized status, reason, supporting text, source URL, retrieval
+time, and raw snapshots. Missing reports remain unknown, never available.
+Handle report revisions, ambiguous names, rate limits, cache hits, and source
+failures. Use conservative requests, honor published terms/robots, do not bypass
+controls, and add fixture tests plus an explicitly labeled live probe.
+
+## T016 | pending | Add a provenance-safe player-news lookup
+Files: src/data_collection/player_data/news.py, scripts/player_news.py, tests/test_player_news.py, docs/player-news.md
+Depends: T011, T012, T013, T015. Runtime dependency: existing `requests`; optional provider key via environment only.
+Acceptance: look up recent relevant items by stable player ID or normalized
+name and return headline, publication time, source URL, retrieval time, and any
+reported availability. Keep official statuses separate from unconfirmed news;
+never infer injury from a headline or treat stale news as current. Structured
+article extraction must retain supporting text, provenance, and uncertainty.
+Cache conservatively, handle rate limits/source failure, keep credentials out
+of Git, avoid an LLM dependency, and fixture-test all classification behavior.
+
+## T017 | pending | Estimate interpretable player contributions
+Files: src/modeling/player_contributions.py, tests/test_player_contributions.py, docs/player-contributions.md
+Depends: T007, T013, T014, T015.
+Acceptance: estimate expected minutes from strictly prior rotations and explicit
+availability scenarios; estimate player strength from pregame historical
+performance with sample-size shrinkage and recency weighting; redistribute
+unavailable minutes within plausible role/position constraints; and aggregate
+expected-minute-weighted team features. Missing availability stays unknown.
+Prevent same-date/future leakage and current-roster historical leakage, expose
+assumptions/uncertainty, and define features to minimize double counting of
+existing team strength. Add focused temporal and scenario regressions.
+
+## T018 | pending | Validate incremental player-feature value
+Files: scripts/player_feature_evaluation.py, tests/test_player_feature_evaluation.py, docs/player-feature-evaluation.md
+Depends: T003, T005, T006, T007, T017.
+Acceptance: freeze numerical promotion criteria before fitting and compare the
+existing baseline, player-stat features, then availability scenarios using
+chronological development validation only. Report accuracy, ROC AUC, log loss,
+Brier score, calibration, hashes, dates, seeds, and sample counts. Enforce
+strict source-available-before-game joins, train-only preprocessing, paired and
+same-date partitions, no current-roster retrospective joins, and no scoring or
+tuning on the exposed 2025-26 period or reserved future holdout. Promote no
+features or production artifact in this task.
+
+## T019 | pending | Integrate accepted player scenarios into inference
+Files: src/modeling/inference.py, src/modeling/player_inference.py, tests/test_player_inference.py, docs/inference.md
+Depends: T008, T018; only accepted T018 features may be integrated.
+Acceptance: extend the read-only inference API with roster contributions,
+availability scenarios, source links, retrieval/source timestamps, and
+stale/missing warnings while preserving the exact production artifact unless a
+separately validated candidate is explicitly promoted. Make live versus
+historical inputs explicit, fail closed on schema/provenance errors, keep
+unknown availability uncertain, and add tests for scenario bounds, stale data,
+source failures, and absence of fallback fabrication.
+
+## T020 | pending | Show player inputs and scenarios in the UI
+Files: dashboards/__init__.py, dashboards/player_panels.py, dashboards/app.py, tests/test_player_panels.py, tests/test_streamlit_app.py, README.md
+Depends: T016, T019.
+Acceptance: show roster contributions, player availability scenarios, official
+versus unconfirmed news, source links, last-updated/source-as-of timestamps, and
+stale/missing-data warnings. Clearly label live versus historical predictions
+and never imply missing injury information confirms availability. AppTests cover
+complete, stale, missing, and provider-failure states without network access or
+artifact writes; document refresh, key setup, and local launch commands.

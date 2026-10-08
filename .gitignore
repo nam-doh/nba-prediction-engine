@@ -17,5 +17,6 @@ credentials*
 *.parquet
 *.csv
 *.html
+data/snapshots/
 .ipynb_checkpoints/
 .DS_Store
