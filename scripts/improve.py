@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """External supervisor. Invoke from a normal terminal, outside Codex sandbox."""
 import argparse
+from contextlib import contextmanager
+import hashlib
 import fcntl
 import json
 import os
@@ -13,6 +15,9 @@ import sys
 import time
 
 ROOT = Path(__file__).resolve().parents[1]
+# Resolve the common checkout when launched from the managed worktree.
+if ROOT.name == 'worktree' and ROOT.parent.name == '.automation':
+    ROOT = ROOT.parent.parent
 STATE = ROOT / '.automation'
 BRANCH = 'automation/nba-improvements'
 PYTHON = ROOT / 'venv/bin/python'
@@ -64,18 +69,25 @@ def verify_agent_log(logfile, agent, provider):
 def run(command, cwd, logfile, timeout=120):
     """Bound the entire process group, including grandchildren."""
     with logfile.open('w') as out:
-        proc = subprocess.Popen(command, cwd=cwd, stdout=out,
+        env = os.environ.copy()
+        env['NBA_RUNNER_CHILD'] = '1'
+        env['GIT_TERMINAL_PROMPT'] = '0'
+        proc = subprocess.Popen(command, cwd=cwd, env=env, stdout=out,
                                 stderr=subprocess.STDOUT, start_new_session=True)
         try:
             return proc.wait(timeout=timeout)
-        except (subprocess.TimeoutExpired, KeyboardInterrupt):
-            os.killpg(proc.pid, signal.SIGTERM)
+        finally:
+            # Kill descendants even when the direct child already exited.
             try:
-                proc.wait(timeout=5)
-            except subprocess.TimeoutExpired:
+                os.killpg(proc.pid, signal.SIGTERM)
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
                 os.killpg(proc.pid, signal.SIGKILL)
                 proc.wait()
-            raise
+            except ProcessLookupError:
+                proc.wait()
 
 
 def git(cwd, *args):
@@ -125,26 +137,29 @@ def validate(cwd, logs, prefix, deadline=None):
 def publish(cwd, paths, title, logs):
     if git(cwd, 'branch', '--show-current') != BRANCH:
         raise RuntimeError('Wrong branch')
+    stage('committing', title)
     git(cwd, 'add', '--', *sorted(paths))
     staged = set(git(cwd, 'diff', '--cached', '--name-only').splitlines())
     if staged != paths:
         raise RuntimeError('Staged files differ from approved task files')
     git(cwd, 'diff', '--cached', '--check')
     git(cwd, 'commit', '-m', title)
-    # Deliberately outside codex exec: no force, no merge, exact refspec.
-    env = os.environ.copy()
-    env['GIT_TERMINAL_PROMPT'] = '0'
-    with (logs / 'push.log').open('a') as out:
-        subprocess.run(['git', 'push', '--set-upstream', 'origin',
-                        f'HEAD:refs/heads/{BRANCH}'], cwd=cwd, env=env,
-                       stdout=out, stderr=subprocess.STDOUT, timeout=120, check=True)
+    record_path = STATE / 'active-run.json'
+    if record_path.exists():
+        record = json.loads(record_path.read_text())
+        record['commit'] = git(cwd, 'rev-parse', 'HEAD')
+        save_record(record)
+    stage('pushing', BRANCH)
+    if run(['git', 'push', '--set-upstream', 'origin',
+            f'HEAD:refs/heads/{BRANCH}'], cwd, logs / 'push.log'):
+        raise RuntimeError('Push failed; inspect push.log, repair authentication or reconcile remote manually')
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--max-tasks', type=int, choices=range(1, 4), default=3)
     parser.add_argument('--task-timeout', type=int, default=900)
-    parser.add_argument('--agent', choices=('codex', 'omp'), default='codex',
+    parser.add_argument('--agent', choices=('codex', 'omp'), default='omp',
                         help='Agent CLI used for task attempts')
     parser.add_argument('--provider', default=DEFAULT_OMP_PROVIDER,
                         help='OMP provider (default: openai-codex)')
@@ -158,22 +173,178 @@ def main():
         parser.error('provider and model must be non-empty')
     if args.task_timeout < 1:
         parser.error('timeout must be positive')
+    if os.environ.get('NBA_RUNNER_CHILD'):
+        raise RuntimeError('Recursive runner launch blocked; run from a normal terminal')
     STATE.mkdir(exist_ok=True, mode=0o700)
-    with (STATE / 'runner.lock').open('w') as lock:
+    entered = False
+    try:
+        with runner_lock(STATE):
+            entered = True
+            session(args)
+    except (Exception, KeyboardInterrupt) as exc:
+        if not entered:
+            stage('blocked', str(exc))
+            logs = STATE / 'logs' / f'{time.strftime("%Y%m%d-%H%M%S")}-{os.getpid()}'
+            logs.mkdir(parents=True, exist_ok=True, mode=0o700)
+            (logs / 'summary.json').write_text(json.dumps(
+                {'completed_tasks': [], 'blocker': str(exc)}, indent=2))
+        raise
+
+
+@contextmanager
+def runner_lock(state):
+    # Never unlink the lock inode: stale metadata is safe once flock succeeds.
+    with (state / 'runner.lock').open('a+') as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            raise RuntimeError('Another runner holds the lock')
-        (STATE / 'runner.pid').write_text(str(os.getpid()))
+            raise RuntimeError('Active runner lock; wait for it or stop its recorded PID')
+        (state / 'runner.pid').write_text(str(os.getpid()))
         try:
-            session(args)
+            yield
         finally:
-            (STATE / 'runner.pid').unlink(missing_ok=True)
+            (state / 'runner.pid').unlink(missing_ok=True)
+
+
+def stage(name, detail=''):
+    print(f'{name}: {detail}', flush=True)
+
+
+def save_record(record):
+    target = STATE / 'active-run.json'
+    temporary = target.with_suffix('.tmp')
+    temporary.write_text(json.dumps(record, indent=2))
+    temporary.replace(target)
+
+
+def fingerprints(cwd, paths):
+    result = {}
+    for name in paths:
+        path = cwd / name
+        if path.is_symlink():
+            raise RuntimeError(f'Unsafe symlink: {name}')
+        result[name] = hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+    return result
+
+
+def ownership(cwd, record):
+    if not record or record.get('complete'):
+        raise RuntimeError('Dirty files have no unfinished run record; inspect ownership manually')
+    if git(cwd, 'rev-parse', 'HEAD') != record['base']:
+        raise RuntimeError('Run base differs from HEAD; inspect history before retrying')
+    if (cwd / 'TASKS.md').read_text() != record['manifest']:
+        raise RuntimeError('Task manifest changed outside the recorded run; review manually')
+    pending = {task: sorted(files | {'PROGRESS.md'}) for task, _, files in tasks(record['manifest'])}
+    if pending.get(record['task']) != sorted(record['allowed']):
+        raise RuntimeError('Recorded allowlist differs from task manifest; inspect manually')
+    paths = changed(cwd)
+    try:
+        if paths:
+            scope(paths, set(record['allowed']), cwd)
+    except RuntimeError as exc:
+        raise RuntimeError(f'{exc}; ownership uncertain, inspect retained files manually') from exc
+    # After a supervisor checkpoint, any different bytes require manual review.
+    if record.get('snapshot') is not None and fingerprints(cwd, paths) != record['snapshot']:
+        raise RuntimeError('Dirty files differ from recorded checkpoint; ownership uncertain, review manually')
+    return paths
+
+
+def execute_task(args, cwd, logs, record, recovery=False):
+    deadline = time.monotonic() + args.task_timeout
+    prompt = (f"Complete only {record['task']}: {record['title']}. Read AGENTS.md and TASKS.md. "
+              f"Only edit these files: {record['allowed']}. Do not edit TASKS.md. "
+              f"No Git mutations or runner launches. Use existing Python {PYTHON}. "
+              'No packages, parallel workers, advisor calls, model/artifact writes. '
+              'Preserve chronological evaluation rules. Record evidence in PROGRESS.md. '
+              f"Diagnose failures using {record.get('logs', logs)} and {logs}.")
+    while True:
+        if recovery:
+            if record['repairs'] >= 2:
+                raise RuntimeError('Two recovery attempts exhausted; review retained changes and logs manually')
+            record['repairs'] += 1
+            stage('repairing', f"{record['task']} attempt {record['repairs']}/2")
+        else:
+            stage('agent working', record['task'])
+        # Persist before launch so an interrupted agent has provenance.
+        record['snapshot'] = None
+        save_record(record)
+        logfile = logs / f"{record['task']}-attempt-{record['repairs']}.jsonl"
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise RuntimeError('Task deadline exceeded; inspect retained run before restarting')
+        rc = run(agent_command(args.agent, prompt, cwd, args.provider, args.model), cwd, logfile, remaining)
+        verify_agent_log(logfile, args.agent, args.provider)
+        ownership(cwd, record)
+        record['snapshot'] = fingerprints(cwd, changed(cwd))
+        save_record(record)
+        stage('validating', record['task'])
+        checks = validate(cwd, logs, f"{record['task']}-{record['repairs']}", deadline)
+        if rc == 0 and checks and changed(cwd):
+            break
+        recovery = True
+        prompt += ' Diagnose and repair the failed independent checks; preserve validation.'
+    # Validate all task files before the supervisor updates status.
+    ownership(cwd, record)
+    (cwd / 'TASKS.md').write_text(record['manifest'].replace(
+        f"## {record['task']} | pending |", f"## {record['task']} | done |", 1))
+    paths = changed(cwd)
+    scope(paths, set(record['allowed']) | {'TASKS.md'}, cwd)
+    record['phase'] = 'publishing'
+    record['publish_snapshot'] = fingerprints(cwd, paths)
+    save_record(record)
+    publish(cwd, paths, f"{record['task']}: {record['title']}", logs)
+    record['complete'] = True
+    save_record(record)
+    stage('completed', record['task'])
+    return record['task']
+
+
+def resume_publication(cwd, logs, record):
+    head = git(cwd, 'rev-parse', 'HEAD')
+    if head == record['base']:
+        paths = changed(cwd)
+        if fingerprints(cwd, paths) != record['publish_snapshot']:
+            raise RuntimeError('Publication files changed; review ownership manually')
+        stage('validating', record['task'])
+        if not validate(cwd, logs, 'resume-publish'):
+            raise RuntimeError('Publication revalidation failed; review logs and retained files')
+        publish(cwd, paths, f"{record['task']}: {record['title']}", logs)
+    else:
+        if changed(cwd) or git(cwd, 'rev-parse', 'HEAD^') != record['base']:
+            raise RuntimeError('Unrecognized commit or dirty files after publication; inspect manually')
+        paths = set(git(cwd, 'diff-tree', '--no-commit-id', '--name-only', '-r', 'HEAD').splitlines())
+        if fingerprints(cwd, paths) != record['publish_snapshot']:
+            raise RuntimeError('Commit differs from validated publication; review manually')
+        stage('validating', record['task'])
+        if not validate(cwd, logs, 'resume-push'):
+            raise RuntimeError('Committed work failed revalidation; inspect logs manually')
+        stage('pushing', BRANCH)
+        rc = run(['git', 'push', '--set-upstream', 'origin', f'HEAD:refs/heads/{BRANCH}'],
+                 cwd, logs / 'push.log')
+        if rc:
+            raise RuntimeError('Push failed; inspect push.log, repair authentication or reconcile remote manually')
+    record['complete'] = True
+    save_record(record)
+    stage('completed', record['task'])
 
 
 def session(args):
+    completed = []
+    blocker = None
     logs = STATE / 'logs' / f'{time.strftime("%Y%m%d-%H%M%S")}-{os.getpid()}'
     logs.mkdir(parents=True, mode=0o700)
+    try:
+        session_work(args, logs, completed)
+    except (Exception, KeyboardInterrupt) as exc:
+        blocker = str(exc) or "Interrupted; inspect active-run.json and restart"
+        stage("blocked", blocker)
+        raise
+    finally:
+        (logs / "summary.json").write_text(json.dumps(
+            {"completed_tasks": completed, "blocker": blocker}, indent=2))
+
+
+def session_work(args, logs, completed):
     print(f'Logs: {logs}', flush=True)
     agent_binary = 'codex' if args.agent == 'codex' else 'omp'
     if not PYTHON.exists() or not shutil.which(agent_binary):
@@ -191,8 +362,24 @@ def session(args):
                                   f'refs/heads/{BRANCH}'], cwd=ROOT).returncode == 0
         git(ROOT, 'worktree', 'add', *([] if exists else ['-b', BRANCH]), str(cwd),
             *([BRANCH] if exists else ['HEAD']))
-    if git(cwd, 'branch', '--show-current') != BRANCH or changed(cwd):
-        raise RuntimeError('Worktree is dirty or wrong branch; inspect it before restarting')
+    if git(cwd, 'branch', '--show-current') != BRANCH:
+        raise RuntimeError(f'Wrong branch; expected {BRANCH}. Inspect worktree manually')
+    record_path = STATE / 'active-run.json'
+    record = json.loads(record_path.read_text()) if record_path.exists() else None
+    if record and not record.get('complete') and record.get('phase') == 'publishing':
+        if record['repairs'] >= 2:
+            raise RuntimeError('Two recovery attempts exhausted; inspect retained publication manually')
+        record['repairs'] += 1
+        save_record(record)
+        resume_publication(cwd, logs, record)
+        completed.append(record['task'])
+    elif changed(cwd):
+        ownership(cwd, record)
+        completed.append(execute_task(args, cwd, logs, record, recovery=True))
+    elif record and not record.get('complete'):
+        if git(cwd, 'rev-parse', 'HEAD') != record['base'] or (cwd / 'TASKS.md').read_text() != record['manifest']:
+            raise RuntimeError('Interrupted run history/manifest changed; review manually')
+        completed.append(execute_task(args, cwd, logs, record, recovery=True))
     if args.bootstrap:
         if (cwd / 'scripts/improve.py').exists():
             raise RuntimeError('Bootstrap already installed; use a normal session')
@@ -205,43 +392,18 @@ def session(args):
         scope(changed(cwd), set(BOOTSTRAP), cwd)
         publish(cwd, changed(cwd), 'Set up unattended improvements and chronological split guard', logs)
         return
-    for task_id, title, files in tasks((cwd / 'TASKS.md').read_text())[:args.max_tasks]:
-        original_tasks = (cwd / 'TASKS.md').read_text()
-        base = git(cwd, 'rev-parse', 'HEAD')
-        allowed = files | {'PROGRESS.md'}
-        prompt = (f'Complete only {task_id}: {title}. Read AGENTS.md and TASKS.md. '
-                  f'Only edit these files: {sorted(allowed)}. Do not edit TASKS.md. '
-                  'No Git mutations. Record acceptance evidence in PROGRESS.md. '
-                  'Use the existing venv; do not install packages or inspect datasets, '
-                  'model binaries, venv contents, or large notebook outputs unless '
-                  'required by this task. Do not invoke advisor, task, or parallel '
-                  'worker calls.')
-        deadline = time.monotonic() + args.task_timeout
-        for attempt in range(3):  # initial attempt plus at most two repairs
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                raise RuntimeError('Task deadline exceeded')
-            logfile = logs / f'{task_id}-attempt-{attempt}.jsonl'
-            rc = run(agent_command(args.agent, prompt, cwd, args.provider, args.model),
-                     cwd, logfile, remaining)
-            verify_agent_log(logfile, args.agent, args.provider)
-            if git(cwd, 'rev-parse', 'HEAD') != base:
-                raise RuntimeError('Agent changed Git history')
-            if (cwd / 'TASKS.md').read_text() != original_tasks:
-                raise RuntimeError('Agent changed task manifest')
-            scope(changed(cwd), allowed, cwd)
-            checks = validate(cwd, logs, f'{task_id}-{attempt}', deadline)
-            if time.monotonic() > deadline:
-                raise RuntimeError('Task deadline exceeded during validation')
-            if rc == 0 and checks:
-                break
-            prompt += f' Repair only this task. Previous attempt failed; inspect {logs} for evidence.'
-        else:
-            raise RuntimeError('Two repairs exhausted; changes retained for review')
-        (cwd / 'TASKS.md').write_text(original_tasks.replace(
-            f'## {task_id} | pending |', f'## {task_id} | done |', 1))
-        scope(changed(cwd), allowed | {'TASKS.md'}, cwd)
-        publish(cwd, changed(cwd), f'{task_id}: {title}', logs)
+    remaining_tasks = args.max_tasks - len(completed)
+    for task_id, title, files in tasks((cwd / 'TASKS.md').read_text())[:remaining_tasks]:
+        if git(cwd, 'branch', '--show-current') != BRANCH:
+            raise RuntimeError(f'Wrong branch; expected {BRANCH}. Inspect manually')
+        if changed(cwd):
+            raise RuntimeError('Unexpected dirty files before task; inspect manually')
+        stage('task selected', f'{task_id}: {title}')
+        record = {'task': task_id, 'title': title, 'allowed': sorted(files | {'PROGRESS.md'}),
+                  'base': git(cwd, 'rev-parse', 'HEAD'), 'manifest': (cwd / 'TASKS.md').read_text(),
+                  'repairs': 0, 'complete': False, 'logs': str(logs)}
+        save_record(record)
+        completed.append(execute_task(args, cwd, logs, record))
 
 
 if __name__ == '__main__':
