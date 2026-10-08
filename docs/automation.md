@@ -1,19 +1,31 @@
 # Unattended improvements
 
 Run from the original repository root in a normal terminal, outside Codex's
-sandbox. No recurring scheduler is installed. Codex CLI must already be signed
-in; never put credentials in this repository. The existing venv is reused.
+sandbox. No recurring scheduler is installed. The selected CLI must already be
+authenticated; never put credentials in this repository. The existing venv is
+reused.
 
 ```sh
 venv/bin/python scripts/improve.py --dry-run --max-tasks 3
 venv/bin/python scripts/improve.py --max-tasks 3
+venv/bin/python scripts/improve.py --agent omp --provider openai-codex \
+  --model gpt-5.6-luna --max-tasks 3
 ```
+
+`--agent` accepts `codex` (the default) or `omp`. OMP uses its supported
+non-interactive `-p/--print` mode, JSON output, an isolated worktree, and
+explicit `--provider`/`--model` flags. The default is the ChatGPT
+`openai-codex` provider with the installed `gpt-5.6-luna` model. The supervisor
+checks OMP's reported provider and stops on a mismatch; it never falls back to
+another provider. Optional advisor and worker calls are disabled by default and
+the task prompt forbids parallel workers. Change provider/model only by an
+explicit command-line choice.
 
 The runner uses `.automation/worktree` on `automation/nba-improvements`, an
 exclusive flock, and `.automation/logs/<timestamp>-<pid>/`. Original working
 changes are never copied into the worktree. New task files are explicitly
-allowlisted. Agent attempts use `codex exec --sandbox workspace-write` with
-approval_policy=never; privileged requests fail rather than prompting. Git
+allowlisted. Agent attempts use `codex exec --sandbox workspace-write` or OMP
+print mode; privileged requests fail rather than prompting. Git
 commit/push are executed only by this external supervisor. No force-push or
 merge commands exist. Non-fast-forward pushes stop the session; inspect and
 reconcile manually. A failed push leaves the validated local commit; after

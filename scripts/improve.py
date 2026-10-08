@@ -23,6 +23,42 @@ BOOTSTRAP = ['.gitignore', 'AGENTS.md', 'TASKS.md', 'PROGRESS.md',
 FATAL = re.compile(r'(?i)(unauthorized|authentication failed|invalid.api.key|'
                    r'usage.limit|rate.limit|quota.exceeded|insufficient_quota|'
                    r'too many requests|token.expired|refresh.token|http\s*(401|403|429))')
+DEFAULT_OMP_PROVIDER = 'openai-codex'
+DEFAULT_OMP_MODEL = 'gpt-5.6-luna'
+
+
+def agent_command(agent, prompt, cwd, provider=DEFAULT_OMP_PROVIDER,
+                  model=DEFAULT_OMP_MODEL):
+    if agent == 'codex':
+        return ['codex', 'exec', '--sandbox', 'workspace-write',
+                '-c', 'approval_policy="never"', '--json', '-C', str(cwd),
+                prompt]
+    if agent == 'omp':
+        return ['omp', '--provider', provider, '--model', model,
+                '--cwd', str(cwd), '--mode', 'json', '--no-session',
+                '--no-extensions', '--no-skills', '--no-pty',
+                '--approval-mode', 'yolo', '-p', prompt]
+    raise ValueError(f'Unsupported agent: {agent}')
+
+
+def verify_agent_log(logfile, agent, provider):
+    """Reject provider changes hidden behind a successful agent response."""
+    seen_providers = set()
+    for line in logfile.read_text().splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            event = {'type': 'error', 'message': line}
+        reported = event.get('provider')
+        if not reported and isinstance(event.get('message'), dict):
+            reported = event['message'].get('provider')
+        if reported:
+            seen_providers.add(reported)
+        if ('error' in event or event.get('type') in ('error', 'turn.failed')) and FATAL.search(line):
+            raise RuntimeError('Authentication/usage failure; session stopped')
+    if agent == 'omp' and seen_providers != {provider}:
+        raise RuntimeError(
+            f'OMP provider mismatch: requested {provider!r}, observed {sorted(seen_providers)}')
 
 
 def run(command, cwd, logfile, timeout=120):
@@ -108,10 +144,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--max-tasks', type=int, choices=range(1, 4), default=3)
     parser.add_argument('--task-timeout', type=int, default=900)
+    parser.add_argument('--agent', choices=('codex', 'omp'), default='codex',
+                        help='Agent CLI used for task attempts')
+    parser.add_argument('--provider', default=DEFAULT_OMP_PROVIDER,
+                        help='OMP provider (default: openai-codex)')
+    parser.add_argument('--model', default=DEFAULT_OMP_MODEL,
+                        help='OMP model (default: gpt-5.6-luna)')
     parser.add_argument('--dry-run', action='store_true')
     parser.add_argument('--bootstrap', action='store_true',
                         help='Publish reviewed setup and completed T001 once')
     args = parser.parse_args()
+    if not args.provider or not args.model:
+        parser.error('provider and model must be non-empty')
     if args.task_timeout < 1:
         parser.error('timeout must be positive')
     STATE.mkdir(exist_ok=True, mode=0o700)
@@ -131,8 +175,9 @@ def session(args):
     logs = STATE / 'logs' / f'{time.strftime("%Y%m%d-%H%M%S")}-{os.getpid()}'
     logs.mkdir(parents=True, mode=0o700)
     print(f'Logs: {logs}', flush=True)
-    if not PYTHON.exists() or not shutil.which('codex'):
-        raise RuntimeError('Existing venv and codex are required')
+    agent_binary = 'codex' if args.agent == 'codex' else 'omp'
+    if not PYTHON.exists() or not shutil.which(agent_binary):
+        raise RuntimeError(f'Existing venv and {agent_binary} are required')
     if args.dry_run:
         plan = tasks((ROOT / 'TASKS.md').read_text())[:args.max_tasks]
         (logs / 'plan.json').write_text(json.dumps(plan, default=sorted, indent=2))
@@ -166,24 +211,20 @@ def session(args):
         allowed = files | {'PROGRESS.md'}
         prompt = (f'Complete only {task_id}: {title}. Read AGENTS.md and TASKS.md. '
                   f'Only edit these files: {sorted(allowed)}. Do not edit TASKS.md. '
-                  'No Git mutations. Record acceptance evidence in PROGRESS.md.')
+                  'No Git mutations. Record acceptance evidence in PROGRESS.md. '
+                  'Use the existing venv; do not install packages or inspect datasets, '
+                  'model binaries, venv contents, or large notebook outputs unless '
+                  'required by this task. Do not invoke advisor, task, or parallel '
+                  'worker calls.')
         deadline = time.monotonic() + args.task_timeout
         for attempt in range(3):  # initial attempt plus at most two repairs
             remaining = deadline - time.monotonic()
             if remaining <= 0:
                 raise RuntimeError('Task deadline exceeded')
             logfile = logs / f'{task_id}-attempt-{attempt}.jsonl'
-            rc = run(['codex', 'exec', '--sandbox', 'workspace-write',
-                      '-c', 'approval_policy="never"', '--json', '-C', str(cwd), prompt],
+            rc = run(agent_command(args.agent, prompt, cwd, args.provider, args.model),
                      cwd, logfile, remaining)
-            # Check structured error events, not successful prose mentioning limits.
-            for line in logfile.read_text().splitlines():
-                try:
-                    event = json.loads(line)
-                except ValueError:
-                    event = {'type': 'error', 'message': line}
-                if ('error' in event or event.get('type') in ('error', 'turn.failed')) and FATAL.search(line):
-                    raise RuntimeError('Authentication/usage failure; session stopped')
+            verify_agent_log(logfile, args.agent, args.provider)
             if git(cwd, 'rev-parse', 'HEAD') != base:
                 raise RuntimeError('Agent changed Git history')
             if (cwd / 'TASKS.md').read_text() != original_tasks:

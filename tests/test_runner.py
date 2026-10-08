@@ -3,7 +3,8 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
-from scripts.improve import FATAL, run, scope, tasks
+from scripts.improve import (DEFAULT_OMP_MODEL, DEFAULT_OMP_PROVIDER, FATAL,
+                             agent_command, run, scope, tasks, verify_agent_log)
 
 
 class RunnerTests(unittest.TestCase):
@@ -15,6 +16,25 @@ class RunnerTests(unittest.TestCase):
         for message in ('HTTP 401', 'usage limit reached', 'insufficient_quota',
                         'authentication failed', 'rate limit exceeded'):
             self.assertTrue(FATAL.search(message))
+
+
+    def test_omp_command_is_explicit_and_noninteractive(self):
+        command = agent_command('omp', 'prompt', Path('/tmp/worktree'))
+        self.assertEqual(command[:5],
+                         ['omp', '--provider', DEFAULT_OMP_PROVIDER, '--model',
+                          DEFAULT_OMP_MODEL])
+        self.assertIn('-p', command)
+        self.assertIn('--no-session', command)
+        self.assertNotIn('--advisor', command)
+
+    def test_omp_log_must_report_requested_provider(self):
+        with tempfile.TemporaryDirectory() as folder:
+            log = Path(folder) / 'omp.jsonl'
+            log.write_text('{"provider":"openai-codex"}\n')
+            verify_agent_log(log, 'omp', 'openai-codex')
+            log.write_text('{"provider":"other"}\n')
+            with self.assertRaises(RuntimeError):
+                verify_agent_log(log, 'omp', 'openai-codex')
 
     def test_scope(self):
         with tempfile.TemporaryDirectory() as folder:
