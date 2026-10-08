@@ -34,7 +34,7 @@ explicit provider/model and rejects a provider mismatch; record the smoke
 result, model, and reported token usage in PROGRESS.md. Do not invoke workers,
 advisor calls, or alter datasets, models, notebooks, or task status.
 
-## T005 | pending | Make evaluation reports reproducible
+## T005 | done | Make evaluation reports reproducible
 Files: scripts/evaluation_report.py, tests/test_evaluation_report.py, docs/evaluation-report.md
 Acceptance: read-only CLI emits deterministic JSON containing the frozen T003
 protocol ID, ordered feature hash, input data hash, seed, library versions,

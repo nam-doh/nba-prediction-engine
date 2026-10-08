@@ -119,3 +119,32 @@
   mutations, dataset/model/notebook changes, or environment installs occurred.
 - Limitation: only the selected `openai-codex`/`gpt-5.6-luna` path was exercised;
   alternate provider/model choices and timeout/retry recovery were not live-tested.
+
+## T005 — reproducible evaluation reports — 2026-10-08
+- Added read-only `scripts/evaluation_report.py`, four focused regression tests,
+  and `docs/evaluation-report.md`. Only the T005 allowlist plus this progress
+  log was edited; `TASKS.md` remains unchanged. No Git mutations, dataset/model/
+  notebook writes, artifact replacement, or package installation occurred.
+- The CLI parses one input snapshot, hashes the exact CSV bytes, evaluates only
+  the frozen T003-v1 training interval [2021-07-01, 2024-07-01) and validation
+  interval [2024-07-01, 2025-07-01), and emits sorted-key JSON containing the
+  ordered feature list/hash, seed, Python/pandas/numpy/sklearn versions,
+  cutoff intervals, retained row/game counts and observed dates, and accuracy,
+  ROC AUC, log loss, and Brier metrics. It fits only the in-memory baseline;
+  no report/model/data files are written.
+- Repeated CLI smoke runs on one unchanged synthetic CSV returned
+  `CLI_SMOKE_OK` with byte-identical 1,574-byte stdout. An invalid-date CLI
+  smoke returned exit code 1 with no stdout (`CLI_INVALID_OK`). Focused
+  `tests.test_evaluation_report` passed all 4 tests, covering byte identity,
+  exposed/future-row exclusion, invalid dates/IDs/missing feature columns,
+  mixed partitions, and input immutability.
+- Required validation passed with the existing `../../venv/bin/python`:
+  `../../venv/bin/python -m unittest discover -s tests -v` — 26 tests passed;
+  `../../venv/bin/python scripts/validate.py` — syntax and notebook structure
+  valid, with no training/holdout execution.
+- Limitations: this task did not execute the default production dataset or
+  inspect 2025-26/2026-27 outcomes. Historical validation remains exposed to
+  prior notebook exploration and is not a pristine holdout; the reserved
+  2026-27 period has no scored result. The report reuses T003's in-memory
+  baseline and paired team-row metrics, so scores are not independent-game
+  confidence estimates.
