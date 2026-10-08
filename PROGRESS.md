@@ -106,16 +106,16 @@
   command must use print mode (`-p`), JSON output, noninteractive controls,
   and the explicit `openai-codex` provider / `gpt-5.6-luna` model. A reported
   provider mismatch raises `RuntimeError`; advisor execution is absent.
-- Smoke result: local command-construction and provider-log verification passed:
-  `../../venv/bin/python -m unittest tests.test_runner -v` — 7 tests passed.
-  No OMP worker or advisor call was made, per the task restriction.
-- Model/provider recorded for the smoke configuration:
-  `gpt-5.6-luna` / `openai-codex`. Reported token usage: **N/A** because no
-  OMP process was invoked; no live usage value is claimed.
+- Direct read-only OMP smoke returned `OMP_SMOKE_OK` with provider
+  `openai-codex` and model `gpt-5.6-luna`; reported usage was 2,275 total
+  tokens (2,267 input, 8 output). No tools, workers, or advisor were enabled.
+- Bounded T004 execution used the same provider/model and reported 7,028 total
+  tokens (6,893 input, 135 output; 49 reasoning tokens). The runner's log is
+  `.automation/logs/20261008-001738-27530/T004-attempt-0.jsonl`.
 - Required validation passed:
   `../../venv/bin/python -m unittest discover -s tests -v` — 22 tests passed;
   `../../venv/bin/python scripts/validate.py` — syntax and notebook structure
   valid, with no training/holdout execution. `TASKS.md` was unchanged; no Git
   mutations, dataset/model/notebook changes, or environment installs occurred.
-- Limitation: this verifies runner wiring and fail-closed provider checking, not
-  live OMP authentication, network execution, or token accounting.
+- Limitation: only the selected `openai-codex`/`gpt-5.6-luna` path was exercised;
+  alternate provider/model choices and timeout/retry recovery were not live-tested.
