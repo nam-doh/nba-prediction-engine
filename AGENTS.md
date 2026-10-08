@@ -1,0 +1,31 @@
+# Project instructions
+
+Use the existing `venv/bin/python` (Python 3.13.9); do not recreate it or install
+requirements automatically. Installed pandas/sklearn differ from requirements.txt.
+The current pipeline lives in notebooks 02/03/06; collection and cleaning scripts
+are under src. Run commands from the repository root.
+
+Preserve all pre-existing edits. Never edit user-dirty files, credentials, venv,
+raw/processed datasets, serialized models, exported HTML, or large artifacts.
+No Git staging, commits, pushes, branch changes, resets, merges, or scheduling
+from a Codex task. The external runner owns Git operations. No sub-agents.
+
+Work on exactly the assigned TASKS.md entry and its explicit file allowlist.
+Do not change the runner, validation commands, AGENTS.md, or task allowlists.
+Add evidence and limitations to PROGRESS.md. Do not mark tasks done yourself;
+the runner does that after independent validation.
+
+Validation: `venv/bin/python -m unittest discover -s tests -v` and
+`venv/bin/python scripts/validate.py`. Add focused regression tests.
+
+Prioritize leakage and temporal correctness before model optimization.
+Pregame rolling/season/opponent statistics must use strictly earlier games;
+keep both team rows and every same-date game in the same temporal partition.
+Fit preprocessing only on training data. Never shuffle or tune on final holdout.
+2025-26 was repeatedly evaluated in existing notebooks: disclose this exposure,
+do not claim it is a pristine holdout. Reserve a new untouched future period.
+For model changes, record a reproducible chronological baseline first (data
+version, dates, features, seed, accuracy, ROC AUC, log loss, Brier score).
+Define numerical validation acceptance criteria before fitting candidates;
+require probability quality and out-of-time performance, not training accuracy.
+Never retrain or replace production artifacts as a side effect of tests.
