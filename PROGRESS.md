@@ -60,3 +60,43 @@
   correctness, or live prediction safety. Detailed evidence and cell references
   are in the audit document. No notebook execution, training, holdout scoring,
   dataset writes, production replacement, or task-status changes occurred.
+
+## T003 — protocol and acceptance evidence — 2026-10-08
+- Added frozen T003-v1 protocol, read-only baseline CLI and five focused
+  regression tests. Edited only docs/evaluation-protocol.md,
+  scripts/baseline.py, tests/test_baseline.py and this log. TASKS.md is unchanged;
+  task status is left for independent runner validation. No Git mutations.
+- Defined gates before fitting: strictly lower validation log loss, Brier no
+  worse, and ROC AUC decrease at most 0.005. No candidates or promotions.
+- Training interval [2021-07-01, 2024-07-01); validation
+  [2024-07-01, 2025-07-01). Scaler fitted exclusively on training. Both rows
+  and all same-date games share a partition; missing features remove whole
+  game pairs. Frozen ordered 18-feature list and seed 42 are in the protocol.
+- Actual retained training: 7,286 rows / 3,643 games, 2021-10-22–2024-04-14;
+  validation: 2,428 rows / 1,214 games, 2024-10-25–2025-04-13.
+  Removed 126 incomplete historical rows (63 games); excluded 2,460 exposed
+  2025-26 rows. Accuracy 0.6383855024711697, ROC AUC 0.701234092099585,
+  log loss 0.6299000714756492, Brier 0.21985809688880792.
+- Data SHA-256:
+  `f5045d6fd053764eedfe0adc301e0a5c23328dfe3a7b851e1b48867ec2b4ffc0`;
+  ordered feature SHA-256:
+  `24381691fe6584c9c3999fc70329fb2abfd03e4be0582a2ead0be99d5f66e3ed`.
+  CLI emits these hashes, cutoffs, seed, model parameters and library versions.
+- Successful independent baseline command: `../../venv/bin/python scripts/baseline.py`.
+  Both required validations passed using that existing interpreter:
+  `../../venv/bin/python -m unittest discover -s tests -v` (20 tests) and
+  `../../venv/bin/python scripts/validate.py`. The requested local
+  `venv/bin/python` remains absent; no environment changes or installs.
+  Python 3.13.9, pandas 3.0.5, numpy 2.5.1, sklearn 1.9.0.
+- Regression evidence: scaler means equal training-only means despite shifted
+  validation values; corrupting exposed/future features and outcomes leaves
+  the report unchanged; missing one team's feature removes both game rows;
+  invalid dates/IDs/targets/features and empty partitions fail closed;
+  numerical gate equality/degradation/nonfinite cases are checked.
+- Explicitly disclosed repeated 2025-26 evaluation and excluded it from tuning,
+  fitting and scoring. Reserved [2026-07-01, 2027-07-01) / season 2026-27
+  untouched; supplied data has no such rows and no future holdout was scored.
+- Limitations: historical validation itself follows prior notebook exploration;
+  provenance and external future-outcome exposure are unverified. Metrics are
+  dependent paired-row summaries, not independent-game confidence estimates.
+  No notebook adoption, data/artifact writes or production model replacement.

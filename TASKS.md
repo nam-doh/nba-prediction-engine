@@ -19,7 +19,7 @@ ordering; regression test deliberately contaminates a feature and detects it.
 Record actual data findings, notebook split/holdout exposure, and limitations.
 Do not mutate datasets or notebooks. Validation runs the audit independently.
 
-## T003 | pending | Freeze chronological evaluation protocol
+## T003 | done | Freeze chronological evaluation protocol
 Files: docs/evaluation-protocol.md, scripts/baseline.py, tests/test_baseline.py
 Acceptance: record baseline on pre-2025-26 chronological train/validation dates,
 with scaler fit only on train; report accuracy, AUC, log loss, Brier, feature/data
