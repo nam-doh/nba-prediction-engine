@@ -26,3 +26,37 @@
   Logs: .automation/logs/20261007-234931-24706/.
 - No model training, evaluation, or production artifact changes. Existing
   notebook consumers are unchanged; adoption is a later scoped task.
+
+## T002 — audit implementation and acceptance evidence — 2026-10-08
+- Added read-only `scripts/audit_leakage.py`, seven focused regression tests,
+  and `docs/leakage-audit.md`. Only the four authorized files were edited;
+  TASKS.md remains unchanged for runner adjudication. No Git mutations.
+- Independent audit exited 0 with `ok: true`, zero issues, 12,300 matching
+  historical/export rows and 6,150 paired games, spanning 2021-10-19 through
+  2026-04-12. Each of five seasons has 2,460 rows. All 40 reconstructed
+  feature columns and 11 copied outcome/box-score columns matched on every
+  row within 1e-9 with matching missingness. All opponent cardinality/identity
+  and strictly earlier team-date checks passed.
+- Data SHA-256: history
+  `abbb5bc18a9eefb448013549e88e99e35b67444f40d63a6f6adb6f6dfeff90a1`;
+  modeling export
+  `f5045d6fd053764eedfe0adc301e0a5c23328dfe3a7b851e1b48867ec2b4ffc0`.
+- Deliberately including the current score in a rolling mean is detected;
+  tests also reject cumulative/opponent/difference contamination, invalid
+  dates, non-strict team dates, bad joins, missing columns and row coverage.
+  Tests verify in-memory and CSV inputs remain unchanged.
+- Validation: all 15 unittest tests passed; unchanged syntax/notebook validator
+  passed; audit was run independently. The worktree lacks `venv/bin/python`
+  (initial invocation failed); used existing `../../venv/bin/python` 3.13.9
+  for all successful checks. No venv changes or dependency installation.
+- Notebook 03's current season split is chronological, but its exclusion of
+  only 2025-26 could admit future seasons into training. Pipeline scaler fits
+  on training rows. Multiple model comparisons/tuned variants expose 2025-26;
+  it is not pristine. Reserve a new untouched future period prospectively.
+  Notebook 02 uses aggregate season associations; notebook 06 trains on all
+  available rows and reuses stale pregame state without an as-of-date filter.
+- Limitations: supplied CSV consistency does not establish upstream provenance,
+  historical availability, notebook/model execution history, downstream split
+  correctness, or live prediction safety. Detailed evidence and cell references
+  are in the audit document. No notebook execution, training, holdout scoring,
+  dataset writes, production replacement, or task-status changes occurred.

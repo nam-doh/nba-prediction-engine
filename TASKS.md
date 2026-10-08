@@ -11,7 +11,7 @@ missing IDs, inconsistent game dates, empty partitions, and reversed cutoffs.
 Tests exercise unsorted paired rows and boundary failures. No model or notebook
 changes; holdout is returned without fitting or scoring.
 
-## T002 | pending | Audit historical pregame leakage
+## T002 | done | Audit historical pregame leakage
 Files: scripts/audit_leakage.py, tests/test_audit_leakage.py, docs/leakage-audit.md
 Acceptance: read-only audit reconstructs shifted rolling and cumulative win
 features from historical rows; checks opponent join cardinality and temporal
