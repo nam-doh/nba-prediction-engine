@@ -172,7 +172,7 @@ model training. Tests are network-free fixtures and prove temporal fields,
 missing optional values, validation, and immutable snapshot provenance;
 document live-verification status and strict pregame-use requirements.
 
-## T015 | pending | Ingest official player availability
+## T015 | done | Ingest official player availability
 Files: requirements.txt, src/data_collection/player_data/availability.py, scripts/refresh_availability.py, tests/test_availability.py, docs/availability.md
 Depends: T011, T012, T013. Runtime dependency: declare the selected PDF/parser package.
 Acceptance: ingest timestamped official NBA injury reports from their structured

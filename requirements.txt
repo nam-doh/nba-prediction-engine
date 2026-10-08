@@ -125,3 +125,4 @@ starlette==1.7.0
 toml==0.10.2
 uvicorn==0.54.0
 websockets==17.2
+pypdf==6.1.1

@@ -4,7 +4,7 @@
 box scores in per-team chronological order. It rejects malformed opponent pairs,
 duplicate identities, invalid dates and infinite source statistics. Missing
 observations are omitted from rolling means; all-missing windows remain NaN.
-season wins/counts and elapsed-calendar-day rest use only strictly earlier dates
+Rolling-five means, season wins/counts and elapsed-calendar-day rest use strictly earlier dates
 within the supplied season. Every game on the target date is excluded. First-game
 history is NaN, not a postgame substitute. Opponents are paired one-to-one.
 

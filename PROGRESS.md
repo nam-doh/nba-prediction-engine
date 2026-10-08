@@ -423,3 +423,20 @@
   April 12 states and one elapsed rest day. No training or holdout scoring.
 - T007/T008 marked done only after independent validation. T006 implementation
   and its six tests were reused unchanged; no duplicate reliability module.
+
+## T015 — official PDF availability — 2026-10-08
+- Added conservative robots-aware official PDF ingestion, immutable raw PDF plus
+  normalized provenance, unique roster/name resolution and explicit unresolved/
+  ambiguous identities. Missing reports/submissions remain unknown; no health
+  inference from omission. Fifteen-minute caching and timestamped revisions.
+- Live HTTP 200 probe: April 4 00:45 ET PDF, 68,500 bytes, 51 parsed rows,
+  including 23 NOT YET SUBMITTED teams. Three-page continuation/wrapped reasons
+  inspected. Snapshot `/tmp/nba-official-live-probe/.../20261008T174452782859Z_6f95cf5e9233e32c.json`;
+  retrieval 2026-10-08, source-as-of 2026-04-04T04:45Z; cache hit observed.
+- Three focused tests and 75-test isolated discovery passed; protected syntax/
+  notebook validator and isolated `pip check` passed. Installed pypdf 6.1.1 only
+  in the external UI environment; protected venv unchanged.
+- No indexed October 8 official report or complete historical archive was found.
+  Prospective refresh requires an actual published URL. This late-collected
+  historical probe cannot supply pregame backtesting availability. No current
+  status, player ID for an ambiguous name, or fallback record was fabricated.
