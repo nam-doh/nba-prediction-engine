@@ -194,7 +194,7 @@ article extraction must retain supporting text, provenance, and uncertainty.
 Cache conservatively, handle rate limits/source failure, keep credentials out
 of Git, avoid an LLM dependency, and fixture-test all classification behavior.
 
-## T017 | pending | Estimate interpretable player contributions
+## T017 | done | Estimate interpretable player contributions
 Files: src/modeling/player_contributions.py, tests/test_player_contributions.py, docs/player-contributions.md
 Depends: T007, T013, T014, T015.
 Acceptance: estimate expected minutes from strictly prior rotations and explicit

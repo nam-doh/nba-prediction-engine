@@ -454,3 +454,19 @@
   `current_availability: null`, and `from_cache: true`.
 - Live news access remains unverified: no GNews key is available. No credentials,
   production data/model changes or holdout execution. No LLM/article scraping.
+
+## T017 — interpretable contribution scenarios — 2026-10-09
+- Added strictly prior same-season rotation estimates, 30-day performance
+  weighting, 300-minute shrinkage, explicit [0,1] scenario fractions and
+  role-constrained redistribution (48 total / 12 extra minutes per player).
+  Unknown availability remains uncertain; official status is never relabeled
+  by an override. Missing history/roles and unallocated minutes stay explicit.
+- Snapshot/record retrieval provenance and source-as-of must precede the game;
+  current rosters cannot join past games. No same-date/future performance enters
+  estimates. Features center changes against observed rotation strength rather
+  than duplicating its mean; dispersion is the statistics-only candidate.
+- Five focused regressions and all 83 isolated tests passed. Protected validator
+  passed. Direct synthetic smoke: out guard 0 minutes, same-role replacement 42,
+  center unchanged at 30, 18 unallocated minutes; unavailable fraction 0.125.
+- No player-adjusted probability, historical effectiveness claim, model fit,
+  production replacement or holdout scoring. Constants are declared assumptions.
