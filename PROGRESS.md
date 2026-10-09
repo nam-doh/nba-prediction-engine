@@ -493,3 +493,17 @@
   reserved 2026-27 unscored. Future prospective snapshots must not turn that
   holdout into a tuning set. T006 marked done after its existing implementation
   and full independent validation were verified, not reimplemented.
+
+## T019 — scenario context implemented; accepted-feature integration blocked
+- Added `InferenceEngine.player_context` and a read-only snapshot adapter for
+  roster contributions, explicit scenarios, official versus unconfirmed news,
+  provenance and stale/missing warnings. Snapshots must precede observation AND
+  game time. Stale official claims remain visible but effective availability is
+  unknown; corrupt or failed sources produce actionable errors, not fallback data.
+- Four focused tests and all 90 isolated tests passed; protected validator passed.
+  Direct scenario smoke retained official `out`, applied 0.5 conditional minutes
+  (15), and returned `probability_adjustment: null`. A no-fit/no-predict regression
+  exercised the public API. The production 36-feature artifact is unchanged.
+- T019 remains pending because T018 has no real-data player-feature gate result.
+  No accepted-feature integration or player-adjusted probability is claimed.
+  Independent scenario context is implemented for the explicitly authorized UI.

@@ -139,6 +139,15 @@ class InferenceEngine:
             "Probability meaning": "Win probabilities are historical-data estimates, not guarantees.",
         }
 
+    def player_context(self, team: str, *, store, game_time: str, observed_at: str, scenarios=None):
+        """Return unvalidated player scenarios separately; never call the classifier."""
+        from .player_inference import player_context
+        ids = self._history.loc[self._history.TEAM_NAME == team, "TEAM_ID"].unique()
+        if len(ids) != 1:
+            raise InferenceError("Unknown or ambiguous team identity for player context.")
+        return player_context(store, team_id=int(ids[0]), game_time=game_time,
+                              observed_at=observed_at, scenarios=scenarios)
+
     def predict_matchup(
         self,
         home_team: str,

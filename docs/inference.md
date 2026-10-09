@@ -70,3 +70,21 @@ artifact writes occurred. Previously recorded immutable source hashes:
   `f5045d6fd053764eedfe0adc301e0a5c23328dfe3a7b851e1b48867ec2b4ffc0`
 - Model SHA-256:
   `292fc17174f370e9785ab29fe380d2591ea6f3be3bc31a2ff4eaeb25e1d39bc6`
+
+## Player context: scenario-only, no promotion
+
+`InferenceEngine.player_context(team, store=SnapshotStore(...), game_time=...,
+observed_at=..., scenarios={player_id: fraction})` exposes local roster,
+contributions, official statuses, unconfirmed news and provenance without calling
+the classifier. Both times require UTC offsets. Eligible snapshots precede both
+observation and hypothetical game time; current snapshots cannot backfill history.
+Snapshot hashes and record provenance are verified. Missing inputs are explicit;
+corruption/provider errors fail closed. Reports older than six hours retain their
+reported status for provenance but effective availability becomes unknown. Rosters
+older than 24 hours are labeled stale. No network requests occur in inference.
+
+Scenario fractions change minutes only, never official status or win probabilities.
+The response always has `probability_adjustment: null` and
+`production_features_accepted: false`. T018 lacks historical pregame snapshot
+coverage, so accepted-feature integration remains blocked. This separate context
+API is usable now, but T019 remains pending until its evaluation dependency passes.
