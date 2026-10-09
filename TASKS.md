@@ -45,7 +45,7 @@ and 2024-25 validation intervals; do not fit, tune, or score the exposed
 2025-26 period or reserved 2026-27 holdout. No dataset, notebook, or model
 artifact writes.
 
-## T006 | pending | Measure validation probability reliability
+## T006 | done | Measure validation probability reliability
 Files: scripts/reliability.py, tests/test_reliability.py, docs/reliability.md
 Acceptance: validation-only report evaluates the frozen T003 baseline with
 log-loss, Brier score, ROC AUC, accuracy, fixed calibration bins, sample

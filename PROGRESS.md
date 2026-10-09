@@ -470,3 +470,26 @@
   center unchanged at 30, 18 unallocated minutes; unavailable fraction 0.125.
 - No player-adjusted probability, historical effectiveness claim, model fit,
   production replacement or holdout scoring. Constants are declared assumptions.
+
+## T018 — runnable evaluation; historical evidence blocked — 2026-10-09
+- Froze T018-v1 before candidate fits; reused T003 baseline/gates and T006 fixed
+  calibration bins. Added read-only manifest-based comparison rebuilding T017
+  features from verified pregame snapshots, with no retrospective current-roster
+  joins, same-date/exposed/future inputs or production promotion.
+- Three focused tests and all 86 isolated tests passed; protected validator
+  passed. Synthetic archived-snapshot tests exercised both candidate fits and
+  confirmed exposed/future manifests are never opened. Missing official reports
+  block only the availability comparison; late roster snapshots fail closed.
+- Actual `../../venv/bin/python -m scripts.player_feature_evaluation` exited 2:
+  missing pregame roster/statistics coverage for all 9,714 retained team/game
+  rows. Repository data inventory has no player snapshot archive. Existing live
+  snapshots were retrieved in October 2026, after all development games.
+- Reproduced baseline before candidates: training 7,286 rows, validation 2,428;
+  accuracy 0.6383855024711697, AUC 0.701234092099585, log loss
+  0.6299000714756492, Brier 0.21985809688880792. Data hash and feature hash match
+  T003; seed 42, train-only scaling, ten calibration bins recorded in CLI output.
+- T018 remains pending: no real player candidate comparison or gate pass exists.
+  No candidate artifact or feature is accepted/promoted; 2025-26 remains exposed,
+  reserved 2026-27 unscored. Future prospective snapshots must not turn that
+  holdout into a tuning set. T006 marked done after its existing implementation
+  and full independent validation were verified, not reimplemented.
