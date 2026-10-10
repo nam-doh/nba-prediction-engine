@@ -168,7 +168,7 @@ class InferenceEngine:
         if unknown:
             raise InferenceError(f"Unknown team selection: {', '.join(unknown)}")
         try:
-            prior = validate_history(self._history[self._history.GAME_DATE < game_date])
+            prior = self._history[self._history.GAME_DATE < game_date]
             year = game_date.year if game_date.month >= 7 else game_date.year - 1
             season = f"{year}-{str(year + 1)[-2:]}"
             home_state = team_state(prior, home_team, game_date, season)

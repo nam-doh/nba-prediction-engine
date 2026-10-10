@@ -400,15 +400,19 @@
   unavailable history stays missing. The 2025-26 probe was ingestion-only and
   did not fit, tune, predict, or score the exposed period or reserved holdout.
 
-## T007 — canonical construction — 2026-10-08
-- Implemented raw completed-game rolling, season, elapsed-day rest and one-to-one
-  opponent features. Same-date games are excluded together; new-season missing
-  history stays NaN. Duplicate/missing opponents and unsorted histories fail.
-- Four focused regressions passed; full isolated discovery passed 70 tests;
-  protected-interpreter `scripts/validate.py` passed. Independent in-memory
-  smoke printed correct paired 11/12 point rolling values, two-day rest and
-  missing first-game/new-season features. No data/model/holdout writes.
-- Calendar-date reconstruction cannot establish upstream publication timestamps.
+## T007 — canonical construction — 2026-10-08; reviewed 2026-10-10
+- Computes raw completed-game rolling, previous win/points, cumulative wins/
+  games, winning streak, season win percentage/game number, elapsed rest and
+  one-to-one opponent features. Same-date team games share one prior-date state;
+  first-season history stays NaN. Requires team abbreviations and MATCHUP, keeps
+  correct home/away indicators, and retains 10 neutral-site games with both
+  HOME_GAME values zero.
+- Six focused regressions passed. Full supplied-data smoke reconstructed 12,300
+  rows / 6,150 games; actual 2021 opening rows have game number 1 and missing
+  prior statistics. Missing-stat regression verifies skip-NaN rolling; all-
+  missing windows stay explicit. No file writes.
+- Current full suite has 97 tests; protected `scripts/validate.py` passed.
+  Calendar dates still do not establish upstream publication timestamps.
 
 ## T008 — canonical inference cutover — 2026-10-08
 - Reused T007 state/opponent construction; removed duplicated/stale precomputed
@@ -421,8 +425,9 @@
   Protected-interpreter syntax/notebook validation passed. Direct real-model
   Boston/OKC smoke on 2026-04-13 returned 0.6135600271453063 and its complement,
   April 12 states and one elapsed rest day. No training or holdout scoring.
-- T007/T008 marked done only after independent validation. T006 implementation
-  and its six tests were reused unchanged; no duplicate reliability module.
+- T007/T008 acceptance implementation is present; task headings remain pending
+  for independent runner adjudication. T006's existing code/tests were reused;
+  no second reliability implementation was added.
 
 ## T015 — official PDF availability — 2026-10-08
 - Added conservative robots-aware official PDF ingestion, immutable raw PDF plus
@@ -490,9 +495,12 @@
   T003; seed 42, train-only scaling, ten calibration bins recorded in CLI output.
 - T018 remains pending: no real player candidate comparison or gate pass exists.
   No candidate artifact or feature is accepted/promoted; 2025-26 remains exposed,
-  reserved 2026-27 unscored. Future prospective snapshots must not turn that
-  holdout into a tuning set. T006 marked done after its existing implementation
-  and full independent validation were verified, not reimplemented.
+  reserved 2026-27 unscored; no holdout is used for prospective-data tuning.
+
+## Task status handling
+- TASKS.md status remains runner-managed. Implementations and evidence here do
+  not imply independent validation/adjudication; task headings remain pending
+  until the runner updates them.
 
 ## T019 — scenario context implemented; accepted-feature integration blocked
 - Added `InferenceEngine.player_context` and a read-only snapshot adapter for
@@ -507,3 +515,28 @@
 - T019 remains pending because T018 has no real-data player-feature gate result.
   No accepted-feature integration or player-adjusted probability is claimed.
   Independent scenario context is implemented for the explicitly authorized UI.
+
+## T020 — player panels integrated; runner adjudication pending — 2026-10-10
+- Added offline two-team player panels beneath the production matchup UI. Shows
+  official reported versus effective status, conditional minutes/strength,
+  unconfirmed news, source links, retrieval/source-as-of timestamps, age and
+  missing/provider-failure warnings. User scenarios are separate from the
+  model date and probabilities; effective status for stale reports becomes unknown.
+- Added AppTests for complete synthetic local snapshots/news, stale official
+  reports, missing inputs, and provider failure. Full-app fixtures exercise both
+  team rotations, official status/news/provenance, then the separate production
+  prediction. Fixture construction uses local temporary snapshots and no network.
+- Streamlit 1.65.0 ran at `http://127.0.0.1:8527`; browser accessibility output
+  showed scenario-only and missing-is-unknown warnings for both teams. The browser
+  click reached Model outlook; screenshot capture repeatedly timed out in this
+  device, so AppTest is the reproducible rendered-interaction evidence.
+- T018/T019 accepted-feature work remains blocked; the UI never promotes or
+  adjusts production probabilities. TASKS.md status remains runner-managed.
+- Final independent validation after the UI edits: isolated Python 3.13.9
+  `python -m unittest discover -s tests -v` — **97 tests passed**;
+  `python scripts/validate.py` passed; `python -m pip check` reported no broken
+  requirements. Protected-v-env real-model smoke remained complementary and
+  finite; no training, data writes, or holdout scores. Browser screenshot capture
+  was unavailable; actual UI text and prediction interaction were exercised.
+- T020 implementation meets its reachable acceptance checks; heading remains
+  pending for runner adjudication. T019 remains pending; no accepted features.

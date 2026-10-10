@@ -317,7 +317,7 @@ export UI_ENV="$HOME/.virtualenvs/nba-prediction-ui"
   test ! -e "$UI_ENV"
   "$BASE_PYTHON" -m venv "$UI_ENV"
   "$UI_ENV/bin/python" -m pip install --constraint requirements.txt \
-    streamlit scikit-learn pandas numpy scipy joblib
+    streamlit scikit-learn pandas numpy scipy joblib nba_api pypdf
   "$UI_ENV/bin/python" -m pip check
 )
 ```
@@ -361,25 +361,93 @@ than the tests.
 
 ### Historical source and supported matchups
 
-The UI reads `data/processed/team_game_modeling.csv`, a **precomputed pregame
-feature export dated through 2026-04-12**, and the existing production model.
+The UI reads raw completed-game columns from `data/processed/team_game_modeling.csv`
+through **2026-04-12**, rebuilds canonical pregame state, and loads the existing model.
 It accepts any two different teams among the export's 30 NBA team names
 (435 pairs / 870 home-away orientations), a hypothetical date after the cutoff
 (default 2026-04-13), and integer rest inputs from 0 through 14 for each team.
 It does not verify that a matchup is scheduled or calculate rest from a live
 schedule. Both probabilities come from the persisted scaler/classifier.
 
-T007 remains pending: no rolling/season features are rebuilt from completed
-games. The selected row's stored pregame statistics exclude that row's own
-game result; a row dated April 12 is not a post-April-12 team update. Dates
-after the cutoff do not refresh team state or implement a new-season reset.
+T007/T008 now reconstruct rolling/season/opponent state from strictly earlier
+completed games, excluding every same-date game. New-season requests without
+same-season history fail closed rather than reusing last season's game 83.
+The API calculates elapsed-calendar-day rest by default; the UI's explicit
+0–14 inputs are hypothetical overrides using the same calendar-day convention.
 These are static hypothetical comparisons, not validated new-season forecasts.
-See [the inference limitations](docs/inference.md) for the game-number and
-as-of details.
+See [inference limitations](docs/inference.md).
 
-Injuries, lineups, trades, and player availability are unavailable. The 2025-26
-season was repeatedly evaluated previously and is not a pristine holdout.
-The reserved 2026-27 holdout remains unscored.
+Player inputs are shown separately: conditional rotation contributions, official
+reported versus effective availability, unconfirmed news, source links and
+retrieval/source-as-of times. **Missing means unknown, not available.** Stale
+official reports do not establish current availability. The separate player
+scenario date defaults to tomorrow at 23:00 UTC; it is not a scheduled matchup.
+Current snapshots never backfill historical dates. No panel changes production
+probabilities: T018 has no real historical player-feature gate result, so T019
+accepted-feature integration and its T020 dependency remain pending.
+
+The 2025-26 season was repeatedly evaluated and is not pristine. The reserved
+2026-27 holdout remains unscored and is not used for tuning prospective snapshots.
+
+### Refresh player snapshots (private local use)
+
+Use the same isolated interpreter. No refresh trains or replaces a model.
+Runtime snapshots are ignored by Git; do not redistribute raw NBA content.
+The UI reads snapshots offline and never performs a provider request.
+
+```bash
+export NBA_PLAYER_SNAPSHOT_DIR="$PWD/data/snapshots/player_data"
+"$UI_ENV/bin/python" -m scripts.refresh_rosters --season 2026-27 \
+  --snapshot-dir "$NBA_PLAYER_SNAPSHOT_DIR"
+"$UI_ENV/bin/python" -m scripts.refresh_player_stats --season 2026-27 \
+  --season-type "Regular Season" --snapshot-dir "$NBA_PLAYER_SNAPSHOT_DIR"
+```
+
+Before the season begins, same-season rotations may be empty: contributions
+remain unavailable. Prior-season or exposed-season logs are not substituted.
+Roster refresh prints a snapshot path for each team. Use the relevant paths
+below; repeat `--roster-snapshot` for additional teams.
+
+```bash
+# Set these to an actually published report and a roster path printed above.
+export NBA_REPORT_URL='https://ak-static.cms.nba.com/referee/injury/Injury-Report_2026-04-04_12_45AM.pdf'
+export NBA_ROSTER_SNAPSHOT='/absolute/path/printed/by/refresh_rosters.json'
+"$UI_ENV/bin/python" -m scripts.refresh_availability --url "$NBA_REPORT_URL" \
+  --roster-snapshot "$NBA_ROSTER_SNAPSHOT" --snapshot-dir "$NBA_PLAYER_SNAPSHOT_DIR"
+```
+
+The sample URL is an **old access probe, not current availability**. Replace it
+with a real published report for prospective collection; the CLI does not guess
+URLs, enumerate an archive or schedule polling. Report/cache revisions are immutable.
+[Availability constraints and live verification](docs/availability.md).
+
+Optional news requires a free GNews account, verified email and a dashboard key
+in `GNEWS_API_KEY` only. Its free plan is delayed and limited to development and
+private noncommercial use; no live response was verified without a key.
+
+```bash
+export GNEWS_API_KEY='your-dashboard-key'
+"$UI_ENV/bin/python" -m scripts.player_news --name 'Jayson Tatum' \
+  --snapshot-dir "$NBA_PLAYER_SNAPSHOT_DIR"
+# Stable-ID lookup additionally requires a roster snapshot:
+"$UI_ENV/bin/python" -m scripts.player_news --player-id 1628369 \
+  --roster-snapshot "$NBA_ROSTER_SNAPSHOT" --snapshot-dir "$NBA_PLAYER_SNAPSHOT_DIR"
+```
+
+No headline is treated as an injury diagnosis. Body claims remain unconfirmed and
+cannot override official statuses. Missing keys/provider failures are actionable
+errors, not synthetic news. [News semantics](docs/player-news.md).
+
+Read-only chronological evaluation:
+
+```bash
+"$UI_ENV/bin/python" -m scripts.player_feature_evaluation
+```
+
+Without a genuine pregame archive manifest, this prints the frozen baseline and
+exits **2 (blocked)** for 9,714 uncovered development team/game rows. It does not
+fit player candidates or promote anything. See the [frozen evaluation protocol](docs/player-feature-evaluation.md)
+for manifest format and provenance requirements.
 
 ### Automation validation environment
 
@@ -405,16 +473,20 @@ HTML notebook reports can also be opened directly without running Jupyter.
 
 ## Current Limitations
 
-The current system does not yet include:
+Current limitations:
 
-* Automated upcoming-schedule ingestion
-* Automatic postgame feature updates
-* Injuries and player availability
-* Starting lineups
-* Player-level predictive features
-* Dynamic simulated team-state updates
-* Live model retraining
-* Automated deployment
+* No validated live schedule or dynamic state updates
+* Official availability is ingested only from explicitly supplied timestamped
+  reports; historical report coverage is incomplete
+* Current player availability remains unknown without a fresh game-specific report
+* News is optional, unconfirmed, delayed, and never a substitute for official status
+* Player rotations are scenario analysis only; no player feature has passed the
+  frozen chronological promotion criteria
+* No starting-lineup feed, model retraining, or public deployment
+
+The inference dashboard displays team probabilities and separate player/source
+panels. Missing player records remain unknown; scenario changes never affect the
+production probability model. See the [player evaluation blocker](docs/player-feature-evaluation.md).
 
 The full-season simulator uses historical pregame feature states, so simulated outcomes do not currently modify the rolling features used in later simulated games.
 
@@ -424,18 +496,18 @@ The full-season simulator uses historical pregame feature states, so simulated o
 
 Potential future extensions include:
 
-* Automated NBA API data updates
-* Daily upcoming-game prediction generation
-* Injury and player availability integration
-* Player-level modeling
+* Prospective injury/availability snapshots
+* Player scenario evaluation after a separately authorized development period
 * Elo or power-rating features
 * Dynamic season simulation
 * Score prediction
-* Automated model retraining
-* Interactive matchup dashboard
+* Automated model retraining only after validation
+* Cloud deployment only after explicit authorization
 * SHAP explanations for live predictions
-* Cloud deployment
 * Prediction API
+* Improved UI accessibility and workflow guidance
+* More trustworthy historical data sources
+* Better schedule validation
 
 ---
 

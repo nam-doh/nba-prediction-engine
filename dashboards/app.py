@@ -13,6 +13,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.modeling.inference import InferenceEngine, InferenceError
+from dashboards.player_panels import render_player_panels
 
 
 st.set_page_config(
@@ -106,13 +107,13 @@ def _render_prediction(result) -> None:
             unsafe_allow_html=True,
         )
         st.markdown(
-            '<div class="meta-pill"><strong>Rest calculation assumption</strong><br>User-provided whole-number inputs; no live schedule is fetched.</div>',
+            '<div class="meta-pill"><strong>Rest calculation assumption</strong><br>Explicit hypothetical elapsed-calendar-day overrides; no live schedule is fetched.</div>',
             unsafe_allow_html=True,
         )
 
     st.warning(
-        "Injuries, lineups, trades, and player availability are not modeled. "
-        "Treat this as a historical-data estimate, not a current roster report."
+        "Injuries, lineups, trades, and player availability are not modeled in these probabilities. "
+        "Player snapshots and conditional scenarios are displayed separately and never adjust this model."
     )
 
 
@@ -153,7 +154,7 @@ def main() -> None:
             max_value=14,
             value=2,
             step=1,
-            help="Whole-number rest input used by the model; 0 means no full day between games.",
+            help="Hypothetical elapsed calendar days between games, matching the model's training convention.",
         )
         away_rest_days = st.number_input(
             "Away rest days",
@@ -161,7 +162,7 @@ def main() -> None:
             max_value=14,
             value=2,
             step=1,
-            help="Whole-number rest input used by the model; 0 means no full day between games.",
+            help="Hypothetical elapsed calendar days between games, matching the model's training convention.",
         )
         cutoff_date = engine.data_cutoff.date()
         game_date = st.date_input(
@@ -179,6 +180,9 @@ def main() -> None:
         "The selected hypothetical date and rest inputs are passed to the persisted scaler/classifier pipeline."
     )
     st.markdown("</div>", unsafe_allow_html=True)
+
+    with st.expander("Player data and conditional scenarios", expanded=True):
+        render_player_panels(engine, (home_team, away_team))
 
     if not predict_clicked:
         st.markdown("### Ready when you are")

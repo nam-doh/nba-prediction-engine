@@ -45,7 +45,7 @@ and 2024-25 validation intervals; do not fit, tune, or score the exposed
 2025-26 period or reserved 2026-27 holdout. No dataset, notebook, or model
 artifact writes.
 
-## T006 | done | Measure validation probability reliability
+## T006 | pending | Measure validation probability reliability
 Files: scripts/reliability.py, tests/test_reliability.py, docs/reliability.md
 Acceptance: validation-only report evaluates the frozen T003 baseline with
 log-loss, Brier score, ROC AUC, accuracy, fixed calibration bins, sample
@@ -56,7 +56,7 @@ missing probabilities, and incomplete game pairs. No calibrator fitting,
 candidate promotion, holdout scoring, dataset mutation, or production artifact
 replacement.
 
-## T007 | done | Enforce as-of pregame feature construction
+## T007 | pending | Enforce as-of pregame feature construction
 Files: src/modeling/pregame_features.py, tests/test_pregame_features.py, docs/pregame-features.md
 Acceptance: reusable in-memory builder computes rolling, cumulative, rest-day,
 and opponent features strictly from earlier games, excludes every same-date
@@ -66,7 +66,7 @@ contamination, and season-boundary leakage; missing history is explicit rather
 than filled from postgame values. No notebook, dataset, serialized-model, or
 production-prediction changes; document integration points and limitations.
 
-## T008 | done | Extract a safe reusable pregame inference API
+## T008 | pending | Extract a safe reusable pregame inference API
 Files: src/modeling/inference.py, tests/test_inference.py, docs/inference.md
 Acceptance: expose one inference entry point used by both the interface and
 tests; load the existing read-only `models/logistic_regression_production.pkl`
@@ -172,7 +172,7 @@ model training. Tests are network-free fixtures and prove temporal fields,
 missing optional values, validation, and immutable snapshot provenance;
 document live-verification status and strict pregame-use requirements.
 
-## T015 | done | Ingest official player availability
+## T015 | pending | Ingest official player availability
 Files: requirements.txt, src/data_collection/player_data/availability.py, scripts/refresh_availability.py, tests/test_availability.py, docs/availability.md
 Depends: T011, T012, T013. Runtime dependency: declare the selected PDF/parser package.
 Acceptance: ingest timestamped official NBA injury reports from their structured
@@ -183,7 +183,7 @@ Handle report revisions, ambiguous names, rate limits, cache hits, and source
 failures. Use conservative requests, honor published terms/robots, do not bypass
 controls, and add fixture tests plus an explicitly labeled live probe.
 
-## T016 | done | Add a provenance-safe player-news lookup
+## T016 | pending | Add a provenance-safe player-news lookup
 Files: src/data_collection/player_data/news.py, scripts/player_news.py, tests/test_player_news.py, docs/player-news.md
 Depends: T011, T012, T013, T015. Runtime dependency: existing `requests`; optional provider key via environment only.
 Acceptance: look up recent relevant items by stable player ID or normalized
@@ -194,7 +194,7 @@ article extraction must retain supporting text, provenance, and uncertainty.
 Cache conservatively, handle rate limits/source failure, keep credentials out
 of Git, avoid an LLM dependency, and fixture-test all classification behavior.
 
-## T017 | done | Estimate interpretable player contributions
+## T017 | pending | Estimate interpretable player contributions
 Files: src/modeling/player_contributions.py, tests/test_player_contributions.py, docs/player-contributions.md
 Depends: T007, T013, T014, T015.
 Acceptance: estimate expected minutes from strictly prior rotations and explicit
